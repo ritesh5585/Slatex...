@@ -1,5 +1,5 @@
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
   const username = searchParams.get("username");
 
   if (!username) {
