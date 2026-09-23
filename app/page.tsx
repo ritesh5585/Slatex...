@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight, User } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
@@ -11,13 +11,27 @@ export default function Home() {
   const router = useRouter();
 
   function handleSearch(username: string) {
-    const Username = username
-      .trim()
-      .replace(/^(?:https?:\/\/github\.com\/|@)?([^\/]+)\/?$/i, "$1");
-
+    const Username = username.trim();
     if (!Username) return;
+
     setIsLoading(true);
-    router.push(`/result?username=${encodeURIComponent(Username)}`);
+    if (Username.includes("github.com/")) {
+      let parts = Username.replace(".git", "")
+        .split("github.com/")[1]
+        .split("/")
+        .filter(Boolean);
+
+      if (parts.length >= 2) {
+        router.push(
+          `/repo?owner=${encodeURIComponent(parts[0])}&repo=${encodeURIComponent(parts[1])}`,
+        );
+      } else {
+        // sirf username URL hai → /result pe bhejo
+        router.push(`/result?username=${encodeURIComponent(parts[0])}`);
+      }
+    } else {
+      router.push(`/result?username=${encodeURIComponent(Username)}`);
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
