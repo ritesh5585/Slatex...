@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Sparkles, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const QUICK_SUGGESTIONS = ["shadcn", "leerob", "torvalds", "kentcdodds"];
 
 export default function Home() {
   const [input, setInput] = useState("");
@@ -13,10 +11,13 @@ export default function Home() {
   const router = useRouter();
 
   function handleSearch(username: string) {
-    const trimmed = username.trim().replace(/^@/, "");
-    if (!trimmed) return;
+    const Username = username
+      .trim()
+      .replace(/^(?:https?:\/\/github\.com\/|@)?([^\/]+)\/?$/i, "$1");
+
+    if (!Username) return;
     setIsLoading(true);
-    router.push(`/result?username=${encodeURIComponent(trimmed)}`);
+    router.push(`/result?username=${encodeURIComponent(Username)}`);
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -60,7 +61,7 @@ export default function Home() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="e.g. shadcn, leerob, torvalds..."
+              placeholder="GitHub username or profile link"
               autoFocus
               className="flex-1 bg-transparent py-2.5 text-sm text-white placeholder-zinc-500 outline-none"
             />
