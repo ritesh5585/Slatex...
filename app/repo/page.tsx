@@ -9,6 +9,12 @@ import { ContributorsList } from "@/components/repo/contributors-list";
 import { CommitActivity } from "@/components/repo/commit-activity";
 import { CommitTimeline } from "@/components/repo/commit-timeline";
 import { ReadmeViewer } from "@/components/repo/readme-viewer";
+import type {
+  GitHubCommit,
+  GitHubCommitActivityWeek,
+  GitHubContributor,
+  GitHubRepository,
+} from "@/lib/github";
 
 interface Props {
   searchParams: Promise<{ owner?: string; repo?: string; url?: string }>;
@@ -107,7 +113,7 @@ export default async function RepoPage({ searchParams }: Props) {
   }
 
   // ── Parallel Fetch ──
-  const [repoRes, langRes, contribRes, commitRes, readmeRes] =
+  const [repoRes, langRes, contribRes, commitRes, activityRes, readmeRes] =
     await Promise.all([
       fetch(`https://api.github.com/repos/${owner}/${repoName}`, {
         next: { revalidate: 3600 },
@@ -122,8 +128,12 @@ export default async function RepoPage({ searchParams }: Props) {
         { next: { revalidate: 3600 }, headers: GH_HEADERS },
       ),
       fetch(
-        `https://api.github.com/repos/${owner}/${repoName}/commits?per_page=10`,
+        `https://api.github.com/repos/${owner}/${repoName}/commits?per_page=100`,
         { next: { revalidate: 300 }, headers: GH_HEADERS },
+      ),
+      fetch(
+        `https://api.github.com/repos/${owner}/${repoName}/stats/commit_activity`,
+        { next: { revalidate: 1800 }, headers: GH_HEADERS },
       ),
       fetch(`https://api.github.com/repos/${owner}/${repoName}/readme`, {
         next: { revalidate: 3600 },
@@ -179,12 +189,17 @@ export default async function RepoPage({ searchParams }: Props) {
   }
 
   // ── Parse Data ──
-  const repo = await repoRes.json();
+  const repo: GitHubRepository = await repoRes.json();
   const languages: Record<string, number> = langRes.ok
     ? await langRes.json()
     : {};
-  const contributors = contribRes.ok ? await contribRes.json() : [];
-  const commits = commitRes.ok ? await commitRes.json() : [];
+  const contributors: GitHubContributor[] = contribRes.ok
+    ? await contribRes.json()
+    : [];
+  const commits: GitHubCommit[] = commitRes.ok ? await commitRes.json() : [];
+  const activity: GitHubCommitActivityWeek[] = activityRes.ok
+    ? (await activityRes.json()).slice(-26)
+    : [];
 
   let readmeContent = "";
   if (readmeRes.ok) {
@@ -221,8 +236,8 @@ export default async function RepoPage({ searchParams }: Props) {
         {/* 2. Stats */}
         <RepoStats repo={repo} />
 
-        {/* 3. Commit Activity Chart (7-day) */}
-        <CommitActivity commits={commits} />
+        {/* 3. Contribution grid (six months) */}
+        <CommitActivity activity={activity} />
 
         {/* 4. Languages + Contributors (side by side on desktop) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

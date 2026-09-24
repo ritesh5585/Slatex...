@@ -1,16 +1,16 @@
-import Image from "next/image";
 import { GitCommit, ExternalLink, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import type { GitHubCommit } from "@/lib/github";
 
 interface Props {
-  commits: any[];
+  commits: GitHubCommit[];
   owner: string;
   repoName: string;
 }
 
 function timeAgo(date: string) {
-  const diff = Date.now() - new Date(date).getTime();
+  const diff = Math.max(0, Date.now() - new Date(date).getTime());
   const mins = Math.floor(diff / 60000);
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
@@ -22,7 +22,7 @@ function timeAgo(date: string) {
 
 // Commit type detect — "feat:", "fix:", "chore:", etc.
 function getCommitType(msg: string) {
-  const match = msg.match(/^(\w+)(\(.+\))?:/);
+  const match = msg.match(/^([\w-]+)(\(.+\))?:/);
   return match ? match[1] : null;
 }
 
@@ -57,39 +57,19 @@ export function CommitTimeline({ commits, owner, repoName }: Props) {
         {/* Vertical timeline line */}
         <div className="absolute left-[19px] top-3 bottom-3 w-px bg-gradient-to-b from-blue-500/40 via-zinc-800 to-transparent" />
 
-        {commits.slice(0, 8).map((c, idx) => {
-          const msg = c.commit.message.split("\n")[0];
+        {commits.slice(0, 8).map((commit) => {
+          const msg = commit.commit.message.split("\n")[0];
           const type = getCommitType(msg);
           const typeColor = type ? TYPE_COLORS[type] || TYPE_COLORS.chore : null;
 
           return (
             <a
-              key={c.sha}
-              href={`https://github.com/${owner}/${repoName}/commit/${c.sha}`}
+              key={commit.sha}
+              href={commit.html_url || `https://github.com/${owner}/${repoName}/commit/${commit.sha}`}
               target="_blank"
               rel="noreferrer"
               className="relative flex items-start gap-4 py-3 pr-2 rounded-lg hover:bg-zinc-900/60 transition-colors"
             >
-              {/* Avatar with ring */}
-              {/* <div className="relative z-10 shrink-0">
-                {c.author?.avatar_url ? (
-                  <Image
-                    src={c.author.avatar_url}
-                    alt={c.commit.author.name}
-                    width={40}
-                    height={40}
-                    className="h-10 w-10 rounded-full ring-2 ring-zinc-900 ring-offset-1 ring-offset-blue-500/30"
-                  />
-                ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 ring-2 ring-zinc-800">
-                    <GitCommit className="h-4 w-4 text-zinc-500" />
-                  </div>
-                )}
-                {idx === 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-zinc-950 animate-pulse" />
-                )}
-              </div> */}
-
               <div className="flex-1 min-w-0">
                 <div className="flex items-start gap-2 flex-wrap">
                   {type && typeColor && (
@@ -105,11 +85,13 @@ export function CommitTimeline({ commits, owner, repoName }: Props) {
                 </div>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
                   <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
-                    {c.sha.slice(0, 7)}
+                    {commit.sha.slice(0, 7)}
                   </span>
-                  <span className="text-zinc-400">{c.commit.author.name}</span>
+                  <span className="text-zinc-400">
+                    {commit.commit.author?.name ?? commit.author?.login ?? "Unknown author"}
+                  </span>
                   <span>•</span>
-                  <span>{timeAgo(c.commit.author.date)}</span>
+                  <span>{commit.commit.author ? timeAgo(commit.commit.author.date) : "Unknown time"}</span>
                 </div>
               </div>
 

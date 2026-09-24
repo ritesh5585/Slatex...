@@ -1,50 +1,29 @@
-"use client";
-
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from "recharts";
 import { Card } from "@/components/ui/card";
-import { Activity, TrendingUp } from "lucide-react";
+import { Activity, ArrowUpRight } from "lucide-react";
+import type { GitHubCommitActivityWeek } from "@/lib/github";
 
 interface Props {
-  commits: any[];
+  activity: GitHubCommitActivityWeek[];
 }
 
-export function CommitActivity({ commits }: Props) {
-  // ── Last 7 days build karo ──
-  const days = Array.from({ length: 7 }).map((_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
-    return d;
-  });
+export function CommitActivity({ activity }: Props) {
+  const weeks = activity.slice(-26);
+  const total = weeks.reduce((sum, week) => sum + week.total, 0);
+  const maxDay = Math.max(...weeks.flatMap((week) => week.days), 0);
+  const average = weeks.length ? (total / weeks.length).toFixed(1) : "0.0";
+  const latestWeek = weeks.at(-1)?.total ?? 0;
+  const previousWeek = weeks.at(-2)?.total ?? 0;
+  const trend = latestWeek - previousWeek;
+  const startDate = weeks[0] ? new Date(weeks[0].week * 1000) : null;
+  const endDate = weeks.at(-1) ? new Date(weeks.at(-1)!.week * 1000) : null;
 
-  const data = days.map((day) => {
-    const dayStr = day.toISOString().slice(0, 10);
-    const count = commits.filter((c) =>
-      c.commit.author.date.startsWith(dayStr),
-    ).length;
-    return {
-      day: day.toLocaleDateString("en-IN", { weekday: "short" }),
-      date: day.toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-      }),
-      count,
-    };
-  });
-
-  const maxCount = Math.max(...data.map((d) => d.count), 1);
-  const total = data.reduce((sum, d) => sum + d.count, 0);
-  const avg = (total / 7).toFixed(1);
-  const todayCount = data[data.length - 1]?.count ?? 0;
-  const yesterdayCount = data[data.length - 2]?.count ?? 0;
-  const trend = todayCount - yesterdayCount;
+  const intensity = (count: number) => {
+    if (!count) return "bg-zinc-800/80";
+    if (count <= Math.max(1, maxDay * 0.25)) return "bg-emerald-950";
+    if (count <= Math.max(1, maxDay * 0.5)) return "bg-emerald-700";
+    if (count <= Math.max(1, maxDay * 0.75)) return "bg-emerald-500";
+    return "bg-emerald-300";
+  };
 
   return (
     <Card className="p-6">
@@ -58,7 +37,7 @@ export function CommitActivity({ commits }: Props) {
             <h2 className="text-lg font-semibold text-white">
               Commit Activity
             </h2>
-            <p className="text-xs text-zinc-500">Last 7 days</p>
+            <p className="text-xs text-zinc-500">Last 6 months</p>
           </div>
         </div>
 
@@ -72,14 +51,13 @@ export function CommitActivity({ commits }: Props) {
         </div>
       </div>
 
-      {/* ── Mini stat row ── */}
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="mb-6 grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="rounded-lg bg-zinc-900/60 px-3 py-2 border border-zinc-800">
           <div className="text-[10px] uppercase tracking-wider text-zinc-500">
-            Avg/day
+            Avg/week
           </div>
           <div className="text-sm font-semibold text-zinc-200 tabular-nums">
-            {avg}
+            {average}
           </div>
         </div>
         <div className="rounded-lg bg-zinc-900/60 px-3 py-2 border border-zinc-800">
@@ -87,7 +65,7 @@ export function CommitActivity({ commits }: Props) {
             Peak
           </div>
           <div className="text-sm font-semibold text-blue-400 tabular-nums">
-            {maxCount}
+            {maxDay}
           </div>
         </div>
         <div className="rounded-lg bg-zinc-900/60 px-3 py-2 border border-zinc-800">
@@ -103,77 +81,81 @@ export function CommitActivity({ commits }: Props) {
                   : "text-zinc-400"
             }`}
           >
-            <TrendingUp
-              className={`h-3 w-3 ${trend < 0 ? "rotate-180" : ""}`}
+            <ArrowUpRight
+              className={`h-3 w-3 ${trend < 0 ? "rotate-90" : ""}`}
             />
-            {trend > 0 ? `+${trend}` : trend}
+            {trend > 0 ? `+${trend}` : trend} / week
           </div>
         </div>
       </div>
 
-      {/* ── Bar Chart ── */}
-      <div className="h-44">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{ top: 5, right: 5, left: -20, bottom: 0 }}
-          >
-            <XAxis
-              dataKey="day"
-              tickLine={false}
-              axisLine={false}
-              tick={{ fill: "#71717a", fontSize: 11 }}
-            />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tick={{ fill: "#71717a", fontSize: 11 }}
-              allowDecimals={false}
-            />
-            <Tooltip
-              cursor={{ fill: "rgba(59, 130, 246, 0.05)" }}
-              contentStyle={{
-                background: "#18181b",
-                border: "1px solid #27272a",
-                borderRadius: "8px",
-                fontSize: "12px",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-              }}
-              labelStyle={{ color: "#a1a1aa", marginBottom: "4px" }}
-              formatter={(value) => [
-                `${value} commit${Number(value) !== 1 ? "s" : ""}`,
-                "",
-              ]}
-              labelFormatter={(label, payload) => {
-                const item = payload?.[0]?.payload;
-                return item ? `${item.date}` : String(label ?? "");
-              }}
-            />
-            <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={40}>
-              {data.map((entry, i) => (
-                <Cell
-                  key={i}
-                  fill={
-                    entry.count === maxCount && entry.count > 0
-                      ? "#3b82f6"
-                      : entry.count > 0
-                        ? "#60a5fa"
-                        : "#27272a"
-                  }
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {weeks.length ? (
+        <div className="overflow-x-auto pb-2">
+          <div className="min-w-155">
+            <div className="mb-2 ml-8 flex justify-between text-[10px] text-zinc-500">
+              <span>
+                {startDate?.toLocaleDateString("en-IN", { month: "short" })}
+              </span>
+              <span>
+                {endDate?.toLocaleDateString("en-IN", {
+                  month: "short",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
+            <div className="flex gap-2 ">
+              <div className="grid grid-rows-7 gap-1 text-[10px] text-zinc-600">
+                <span>Mon</span>
+                <span />
+                <span>Wed</span>
+                <span />
+                <span>Fri</span>
+                <span />
+                <span />
+              </div>
+              <div className=" grid auto-cols-3 grid-flow-col grid-rows-7 gap-1">
+                {weeks.flatMap((week) =>
+                  week.days.map((count, day) => (
+                    <span
+                      key={`${week.week}-${day}`}
+                      title={`${count} commit${count === 1 ? "" : "s"} on ${new Date(week.week * 1000 + day * 86400000).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`}
+                      className={`h-3 w-3 rounded-[3px] ring-1 ring-inset ring-white/5 ${intensity(count)}`}
+                    />
+                  )),
+                )}
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-end gap-1.5 text-[10px] text-zinc-500">
+              Less <span className="h-3 w-3 rounded-[3px] bg-zinc-800/80" />
+              <span className="h-3 w-3 rounded-[3px] bg-emerald-950" />
+              <span className="h-3 w-3 rounded-[3px] bg-emerald-700" />
+              <span className="h-3 w-3 rounded-[3px] bg-emerald-500" />
+              <span className="h-3 w-3 rounded-[3px] bg-emerald-300" /> More
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="flex min-h-32 items-center justify-center rounded-xl border border-dashed border-zinc-800 bg-zinc-950/40 px-6 text-center text-sm text-zinc-500">
+          GitHub is still preparing contribution statistics for this repository.
+        </div>
+      )}
 
       {/* ── Footer ── */}
       <div className="mt-4 flex items-center justify-between text-xs text-zinc-500">
         <span>
-          {data[0].date} → {data[data.length - 1].date}
+          {startDate?.toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+          }) ?? "No activity"}{" "}
+          →{" "}
+          {endDate?.toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+          }) ?? ""}
         </span>
         <span>
-          Peak: <span className="text-blue-400 font-semibold">{maxCount}</span>
+          Peak day:{" "}
+          <span className="font-semibold text-emerald-400">{maxDay}</span>
         </span>
       </div>
     </Card>

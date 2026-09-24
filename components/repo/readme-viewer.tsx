@@ -1,9 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import { BookOpen, ExternalLink } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 interface Props {
@@ -13,17 +13,26 @@ interface Props {
 }
 
 export function ReadmeViewer({ content, owner, repoName }: Props) {
+  const [expanded, setExpanded] = useState(false);
+
   if (!content) return null;
+
+  const githubBase = owner && repoName
+    ? `https://github.com/${owner}/${repoName}/blob/HEAD/`
+    : "";
 
   return (
     <Card className="overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between gap-2.5 px-6 py-4 border-b border-zinc-800 bg-zinc-900/40">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 bg-zinc-900/40 px-5 py-4 sm:px-6">
         <div className="flex items-center gap-2.5">
-          <div className="inline-flex rounded-xl bg-zinc-700/30 p-2 text-zinc-300 ring-1 ring-zinc-700/40">
+          <div className="inline-flex rounded-xl bg-blue-500/10 p-2 text-blue-400 ring-1 ring-blue-500/20">
             <BookOpen className="h-4 w-4" />
           </div>
-          <h2 className="text-lg font-semibold text-white">README.md</h2>
+          <div>
+            <h2 className="text-lg font-semibold text-white">README.md</h2>
+            <p className="text-xs text-zinc-500">Project documentation</p>
+          </div>
         </div>
         {owner && repoName && (
           <a
@@ -32,15 +41,16 @@ export function ReadmeViewer({ content, owner, repoName }: Props) {
             rel="noreferrer"
             className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-blue-400"
           >
-            Open on GitHub <ExternalLink className="h-3 w-3" />
+            Open on GitHub <ExternalLink className="h-3.5 w-3.5" />
           </a>
         )}
       </div>
 
       {/* Content */}
-      <div className="px-6 sm:px-8 py-6 overflow-x-auto">
+      <div className="relative px-5 py-6 sm:px-8">
+        <div className={`overflow-hidden transition-[max-height] duration-500 ${expanded ? "max-h-none" : "max-h-120"}`}>
         <article
-          className="prose prose-invert prose-sm sm:prose-base max-w-none
+          className="prose prose-invert max-w-3xl prose-sm sm:prose-base
             prose-headings:text-white prose-headings:font-semibold prose-headings:tracking-tight
             prose-h1:text-2xl prose-h1:border-b prose-h1:border-zinc-800 prose-h1:pb-2 prose-h1:mb-4
             prose-h2:text-xl prose-h2:border-b prose-h2:border-zinc-800 prose-h2:pb-2 prose-h2:mt-8
@@ -63,28 +73,28 @@ export function ReadmeViewer({ content, owner, repoName }: Props) {
             [&_table]:w-full [&_table]:block [&_table]:overflow-x-auto sm:[&_table]:table
             [&_details]:rounded-lg [&_details]:border [&_details]:border-zinc-800 [&_details]:p-3 [&_details]:my-3
             [&_summary]:cursor-pointer [&_summary]:text-zinc-200 [&_summary]:font-medium
-            [&_input[type=checkbox]]:accent-blue-500 [&_input[type=checkbox]]:mr-2"
+            [&_input[type=checkbox]]:accent-blue-500 [&_input[type=checkbox]]:mr-2
+            prose-p:my-4 prose-headings:scroll-mt-20"
         >
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw]}
             components={{
-              // Force external links to open in new tab
               a: ({ href, children, ...props }) => (
                 <a
-                  href={href}
+                  href={href?.startsWith("http") ? href : `${githubBase}${href?.replace(/^\.\//, "") || ""}`}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noreferrer noopener"
                   {...props}
                 >
                   {children}
                 </a>
               ),
-              // Responsive images
               img: ({ src, alt, ...props }) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={typeof src === "string" ? src : ""}
+                  src={typeof src === "string" && src.startsWith("http")
+                    ? src
+                    : `${githubBase}${typeof src === "string" ? src.replace(/^\.\//, "") : ""}`}
                   alt={alt || ""}
                   loading="lazy"
                   {...props}
@@ -95,6 +105,19 @@ export function ReadmeViewer({ content, owner, repoName }: Props) {
             {content}
           </ReactMarkdown>
         </article>
+        </div>
+        {!expanded && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-16 h-28 bg-linear-to-t from-zinc-900 via-zinc-900/80 to-transparent" />
+        )}
+        <button
+          type="button"
+          onClick={() => setExpanded((value) => !value)}
+          aria-expanded={expanded}
+          className="relative mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800/70 px-4 py-3 text-sm font-medium text-zinc-200 transition-colors hover:border-blue-500/50 hover:bg-blue-500/10 hover:text-white"
+        >
+          {expanded ? "Show less" : "Read full README"}
+          {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </button>
       </div>
     </Card>
   );
