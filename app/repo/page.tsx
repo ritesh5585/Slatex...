@@ -187,6 +187,7 @@ export default async function RepoPage({ searchParams }: Props) {
       />
     );
   }
+  
 
   // ── Parse Data ──
   const repo: GitHubRepository = await repoRes.json();
@@ -197,8 +198,11 @@ export default async function RepoPage({ searchParams }: Props) {
     ? await contribRes.json()
     : [];
   const commits: GitHubCommit[] = commitRes.ok ? await commitRes.json() : [];
-  const activity: GitHubCommitActivityWeek[] = activityRes.ok
-    ? (await activityRes.json()).slice(-26)
+
+  const rawAcitivity = activityRes.ok ? await commitRes.json : [];
+  console.log(rawAcitivity)
+  const activity: GitHubCommitActivityWeek[] = Array.isArray(rawAcitivity)
+    ? rawAcitivity.slice(-26)
     : [];
 
   let readmeContent = "";
@@ -214,18 +218,7 @@ export default async function RepoPage({ searchParams }: Props) {
     <main className="min-h-screen bg-zinc-950 text-zinc-100 antialiased pb-24 selection:bg-blue-500/30 selection:text-blue-200">
       {/* Sticky Header */}
       <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-zinc-400 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Search Another Developer</span>
-          </Link>
-          <span className="hidden sm:inline-flex text-xs text-zinc-500 font-mono">
-            github.com/{owner}/{repoName}
-          </span>
-        </div>
+        
       </header>
 
       {/* Main Content */}

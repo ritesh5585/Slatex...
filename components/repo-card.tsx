@@ -5,10 +5,15 @@ import { Star, GitFork, ExternalLink } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getLanguageColor } from "@/lib/language-colors";
+import Link from "next/link";
 
 export interface GitHubRepo {
   id: number;
   name: string;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
   description: string | null;
   html_url: string;
   language: string | null;
@@ -40,10 +45,8 @@ export function RepoCard({ repo, index }: RepoCardProps) {
       }}
       className="h-full"
     >
-      <a
-        href={repo.html_url}
-        target="_blank"
-        rel="noopener noreferrer"
+      <Link
+        href={`/repo?owner=${repo.owner.login}&repo=${repo.name}`}
         className="group block h-full select-none"
       >
         <Card className="flex h-full flex-col justify-between p-5 border-zinc-800/80 bg-zinc-900/50 backdrop-blur-md transition-all duration-300 hover:border-zinc-500/60 ">
@@ -56,7 +59,7 @@ export function RepoCard({ repo, index }: RepoCardProps) {
               <ExternalLink className="h-4 w-4 shrink-0 text-zinc-500 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-blue-300 transition-all duration-200" />
             </div>
 
-            <p className="text-xs sm:text-sm text-zinc-400 line-clamp-2 min-h-[2.5rem] leading-relaxed">
+            <p className="text-xs sm:text-sm text-zinc-400 line-clamp-2 min-h-10 leading-relaxed">
               {repo.description || "No description provided."}
             </p>
 
@@ -94,7 +97,7 @@ export function RepoCard({ repo, index }: RepoCardProps) {
                       boxShadow: `0 0 6px ${languageColor}80`,
                     }}
                   />
-                  <span className="text-zinc-300 font-medium truncate max-w-[110px]">
+                  <span className="text-zinc-300 font-medium truncate max-w-27.5">
                     {repo.language}
                   </span>
                 </>
@@ -116,7 +119,7 @@ export function RepoCard({ repo, index }: RepoCardProps) {
             </div>
           </div>
         </Card>
-      </a>
+      </Link>
     </motion.div>
   );
 }
