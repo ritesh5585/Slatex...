@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
@@ -22,7 +22,7 @@ export default function Home() {
         .filter(Boolean);
 
       if (parts.length >= 2) {
-        console.log(parts)
+        console.log(parts);
         router.push(
           `/repo?owner=${encodeURIComponent(parts[0])}&repo=${encodeURIComponent(parts[1])}`,
         );
@@ -33,6 +33,7 @@ export default function Home() {
     } else {
       router.push(`/result?username=${encodeURIComponent(Username)}`);
     }
+    setIsLoading(false);
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -58,7 +59,7 @@ export default function Home() {
             </span>
           </h1>
           <p className="text-sm sm:text-base text-zinc-400 max-w-md mx-auto leading-relaxed">
-            Enter any public GitHub username to generate a sleek,
+            Enter any public GitHub username or repo to generate a sleek,
             production-grade developer dashboard and repository analytics.
           </p>
         </div>
@@ -68,24 +69,22 @@ export default function Home() {
           onSubmit={handleSubmit}
           className="w-full relative rounded-2xl border border-zinc-800 bg-zinc-900/60 p-2 backdrop-blur-xl shadow-2xl transition-all focus-within:border-zinc-700 focus-within:ring-2 focus-within:ring-blue-500/30"
         >
-          <div className="flex items-center gap-2">
-            <div className="pl-3 text-zinc-500">
-              <Search className="h-4 w-4" />
-            </div>
+          <div className="flex flex-row gap-2 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-2 sm:flex-row sm:items-center sm:gap-0 sm:p-0 sm:px-4 sm:py-1">
+            {" "}
+            <div className="text-zinc-500"></div>
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="GitHub username or profile link"
+              placeholder="type here..."
               autoFocus
-              className="flex-1 bg-transparent py-2.5 text-sm text-white placeholder-zinc-500 outline-none"
+              className="w-full rounded-2xl bg-zinc-900/50 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-zinc-700 sm:flex-1 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-2.5 sm:focus:border-0"
             />
             <Button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="rounded-xl px-4 py-2 text-sm font-semibold gap-1.5 shrink-0"
+              className=" flex w-10 rounded-xl px-2 py-2 mt-0.5 text-sm font-semibold gap-1.5 shrink-0"
             >
-              <span>{isLoading ? "Analyzing..." : "Analyze"}</span>
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>

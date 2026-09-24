@@ -222,7 +222,7 @@ export function HeroSection({ user }: HeroSectionProps) {
                     className="gap-1.5 py-1 text-xs text-blue-400 hover:text-blue-300 hover:border-blue-500/40"
                   >
                     <Link2 className="h-3.5 w-3.5 text-blue-400" />
-                    <span className="truncate max-w-[200px]">
+                    <span className="truncate max-w-50px">
                       {user.blog?.replace(/^https?:\/\//, "")}
                     </span>
                   </Badge>

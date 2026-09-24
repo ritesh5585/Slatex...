@@ -200,10 +200,9 @@ export default async function RepoPage({ searchParams }: Props) {
     : [];
   const commits: GitHubCommit[] = commitRes.ok ? await commitRes.json() : [];
 
-  const rawAcitivity = activityRes.ok ? await commitRes.json : [];
-  console.log(rawAcitivity)
-  const activity: GitHubCommitActivityWeek[] = Array.isArray(rawAcitivity)
-    ? rawAcitivity.slice(-26)
+  const rawActivity = activityRes.ok ? await activityRes.json() : [];
+  const activity: GitHubCommitActivityWeek[] = Array.isArray(rawActivity)
+    ? rawActivity.slice(-26)
     : [];
 
   let readmeContent = "";
@@ -220,7 +219,7 @@ export default async function RepoPage({ searchParams }: Props) {
       {/* Sticky Header */}
       <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <BackButton/>
+          <BackButton />
           <span className="hidden sm:inline-flex text-xs text-zinc-500 font-mono">
             github.com/{owner}/{repoName}
           </span>

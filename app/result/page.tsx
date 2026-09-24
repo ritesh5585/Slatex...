@@ -32,12 +32,7 @@ export default async function ResultPage({ searchParams }: Props) {
               statistics.
             </p>
           </div>
-          <Link href="/" className="inline-block pt-2">
-            <Button variant="default" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Search</span>
-            </Button>
-          </Link>
+          <BackButton/>
         </Card>
       </main>
     );
@@ -74,12 +69,7 @@ export default async function ResultPage({ searchParams }: Props) {
             </p>
           </div>
           <div className="pt-2 flex justify-center">
-            <Link href="/">
-              <Button variant="outline" className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                <span>Search Another User</span>
-              </Button>
-            </Link>
+            <BackButton/>
           </div>
         </Card>
       </main>
@@ -103,12 +93,7 @@ export default async function ResultPage({ searchParams }: Props) {
             </p>
           </div>
           <div className="pt-2 flex justify-center">
-            <Link href="/">
-              <Button variant="outline" className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                <span>Return Home</span>
-              </Button>
-            </Link>
+            <BackButton/>
           </div>
         </Card>
       </main>
@@ -130,12 +115,7 @@ export default async function ResultPage({ searchParams }: Props) {
             again later.
           </p>
           <div className="pt-2 flex justify-center">
-            <Link href="/">
-              <Button variant="outline" className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                <span>Back to Home</span>
-              </Button>
-            </Link>
+            <BackButton/>
           </div>
         </Card>
       </main>

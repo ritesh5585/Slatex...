@@ -36,5 +36,4 @@ export interface GitHubCommitActivityWeek {
   week: number;
   total: number;
   days: number[];
-  never: number
 }
