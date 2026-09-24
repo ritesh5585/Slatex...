@@ -7,6 +7,7 @@ import { RepoGrid } from "@/components/repo-grid";
 import { type GitHubRepo } from "@/components/repo-card";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { BackButton } from "@/components/back-button";
 
 interface Props {
   searchParams: Promise<{ username?: string }>;
@@ -177,13 +178,7 @@ export default async function ResultPage({ searchParams }: Props) {
       {/* ── Top Navigation Bar ── */}
       <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/"
-            className="group inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-zinc-400 transition-colors hover:text-white"
-          >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-            <span>Search Another Developer</span>
-          </Link>
+          <BackButton/>
 
           <div className="flex items-center gap-2">
             <span className="hidden sm:inline-flex text-xs text-zinc-500 font-mono">
@@ -192,6 +187,7 @@ export default async function ResultPage({ searchParams }: Props) {
             <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
           </div>
         </div>
+        
       </header>
 
       {/* ── 1. Hero Cover Section (Edge-to-Edge) ── */}

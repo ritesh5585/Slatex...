@@ -15,6 +15,7 @@ import type {
   GitHubContributor,
   GitHubRepository,
 } from "@/lib/github";
+import { BackButton } from "@/components/back-button";
 
 interface Props {
   searchParams: Promise<{ owner?: string; repo?: string; url?: string }>;
@@ -218,7 +219,12 @@ export default async function RepoPage({ searchParams }: Props) {
     <main className="min-h-screen bg-zinc-950 text-zinc-100 antialiased pb-24 selection:bg-blue-500/30 selection:text-blue-200">
       {/* Sticky Header */}
       <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-xl">
-        
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <BackButton/>
+          <span className="hidden sm:inline-flex text-xs text-zinc-500 font-mono">
+            github.com/{owner}/{repoName}
+          </span>
+        </div>
       </header>
 
       {/* Main Content */}
