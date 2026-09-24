@@ -104,14 +104,14 @@ export function CommitActivity({ activity }: Props) {
               </span>
             </div>
             <div className="flex gap-2 ">
-              <div className="grid grid-rows-7 gap-1 text-[10px] text-zinc-600">
+              <div className="grid grid-rows-7 gap-1 text-[9px] text-zinc-600">
                 <span>Mon</span>
-                <span />
+                <span>Tue</span>
                 <span>Wed</span>
-                <span />
+                <span>Thu</span>
                 <span>Fri</span>
-                <span />
-                <span />
+                <span>Sat</span>
+                <span>Sun</span>
               </div>
               <div className=" grid auto-cols-3 grid-flow-col grid-rows-7 gap-1">
                 {weeks.flatMap((week) =>
