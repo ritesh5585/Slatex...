@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Star, GitFork, Eye, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface Props {
@@ -14,13 +14,13 @@ export function RepoHeader({ repo, owner }: Props) {
       <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
 
       <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
-        <Image
-          src={repo.owner.avatar_url}
+        {/* <Image
+          src={repo?.owner?.avatar_url}
           alt={owner}
           width={80}
           height={80}
           className="h-20 w-20 rounded-2xl ring-2 ring-zinc-800"
-        />
+        /> */}
 
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">

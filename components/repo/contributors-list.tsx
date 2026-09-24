@@ -27,13 +27,13 @@ export function ContributorsList({ contributors }: Props) {
             rel="noreferrer"
             className="flex flex-col items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/40 p-3 text-center"
           >
-            <Image
+            {/* <Image
               src={c.avatar_url}
               alt={c.login}
               width={48}
               height={48}
               className="h-12 w-12 rounded-full ring-2 ring-zinc-800"
-            />
+            /> */}
             <div className="min-w-0 w-full">
               <p className="text-xs font-medium text-zinc-200 truncate">
                 @{c.login}
