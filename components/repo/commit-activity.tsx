@@ -179,16 +179,16 @@ export function CommitActivity({ activity }: Props) {
               <div className="overflow-x-auto pb-1 scrollbar-thin">
                 <div className="flex gap-1.5 min-w-max sm:gap-2">
                   {/* Weekday labels */}
-                  <div className="grid grid-rows-7 gap-[3px] text-[9px] text-zinc-600 pt-[1px] w-6">
+                  <div className="grid grid-rows-7 gap-0.75 text-[9px] text-zinc-600 pt-px w-6">
                     {WEEKDAYS.map((d, i) => (
-                      <span key={i} className="leading-[12px]">
+                      <span key={i} className="leading-3">
                         {d}
                       </span>
                     ))}
                   </div>
 
                   {/* Cells */}
-                  <div className="grid auto-cols-[12px] grid-flow-col grid-rows-7 gap-1">
+                  <div className="grid auto-cols-3 grid-flow-col grid-rows-7 gap-1">
                     {weeks.flatMap((week, wi) =>
                       week.days.map((count, day) => {
                         const date = new Date(

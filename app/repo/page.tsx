@@ -15,7 +15,7 @@ import type {
   GitHubContributor,
   GitHubRepository,
 } from "@/lib/github";
-import { BackButton } from "@/components/back-button";
+import { BackButton } from "@/components/shared/back-button";
 
 interface Props {
   searchParams: Promise<{ owner?: string; repo?: string; url?: string }>;

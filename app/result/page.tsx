@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { ArrowLeft, UserX, AlertCircle, RefreshCw } from "lucide-react";
-import { HeroSection, type GitHubUser } from "@/components/hero-section";
-import { StatsCards } from "@/components/stats-cards";
-import { LanguageChart } from "@/components/language-chart";
-import { RepoGrid } from "@/components/repo-grid";
-import { type GitHubRepo } from "@/components/repo-card";
+import { HeroSection, type GitHubUser } from "@/components/user/hero-section";
+import { StatsCards } from "@/components/user/stats-cards";
+import { LanguageChart } from "@/components/user/language-chart";
+import { RepoGrid } from "@/components/user/repo-grid";
+import { type GitHubRepo } from "@/components/user/repo-card";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BackButton } from "@/components/back-button";
+import { BackButton } from "@/components/shared/back-button";
 
 interface Props {
   searchParams: Promise<{ username?: string }>;

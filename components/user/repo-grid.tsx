@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GitBranch, ChevronDown } from "lucide-react";
-import { RepoCard, type GitHubRepo } from "@/components/repo-card";
-import { EmptyState } from "@/components/empty-state";
+import { RepoCard, type GitHubRepo } from "@/components/user/repo-card";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 

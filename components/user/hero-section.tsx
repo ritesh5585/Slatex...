@@ -14,7 +14,7 @@ import {
 import { GithubIcon } from "@/components/icons/github";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CopyToast } from "@/components/copy-toast";
+import { CopyToast } from "@/components/shared/copy-toast";
 
 export interface GitHubUser {
   avatar_url: string;

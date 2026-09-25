@@ -22,7 +22,7 @@ export default function Home() {
         .filter(Boolean);
 
       if (parts.length >= 2) {
-        console.log(parts);
+        
         router.push(
           `/repo?owner=${encodeURIComponent(parts[0])}&repo=${encodeURIComponent(parts[1])}`,
         );
