@@ -6,7 +6,7 @@ export default function Loading() {
       {/* ── 1. Hero Cover Skeleton ── */}
       <div className="relative w-full overflow-hidden">
         {/* Banner Skeleton */}
-        <div className="h-[220px] sm:h-[260px] md:h-[280px] w-full bg-zinc-900/60 animate-pulse border-b border-zinc-800/40" />
+        <div className="h-55 sm:h-65] md:h-70 w-full bg-zinc-900/60 animate-pulse border-b border-zinc-800/40" />
 
         {/* Profile Details Container */}
         <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -15,7 +15,7 @@ export default function Loading() {
               {/* Left Column: Avatar + Profile Info */}
               <div className="flex flex-col sm:flex-row items-start sm:items-end gap-5 sm:gap-6">
                 {/* Avatar Skeleton */}
-                <Skeleton className="h-24 w-24 sm:h-28 sm:w-28 md:h-[120px] md:w-[120px] rounded-full ring-4 ring-zinc-950 shrink-0" />
+                <Skeleton className="h-24 w-24 sm:h-28 sm:w-28 md:h-30 md:w-30rounded-full ring-4 ring-zinc-950 shrink-0" />
 
                 {/* Name, Username & Bio Skeletons */}
                 <div className="flex flex-col space-y-3 w-full sm:w-80">

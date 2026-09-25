@@ -5,9 +5,10 @@ import { StatsCards } from "@/components/user/stats-cards";
 import { LanguageChart } from "@/components/user/language-chart";
 import { RepoGrid } from "@/components/user/repo-grid";
 import { type GitHubRepo } from "@/components/user/repo-card";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ContributionStreaks } from "@/components/user/contro-streaks";
 import { BackButton } from "@/components/shared/back-button";
+import { fetchContributions } from "@/lib/github-contributions";
 
 interface Props {
   searchParams: Promise<{ username?: string }>;
@@ -32,7 +33,7 @@ export default async function ResultPage({ searchParams }: Props) {
               statistics.
             </p>
           </div>
-          <BackButton/>
+          <BackButton />
         </Card>
       </main>
     );
@@ -40,14 +41,22 @@ export default async function ResultPage({ searchParams }: Props) {
 
   const cleanUsername = username.trim().replace(/^@/, "");
 
-  // Fetch GitHub User
-  const userRes = await fetch(`https://api.github.com/users/${cleanUsername}`, {
+  const githubFetchOptions = {
     next: { revalidate: 3600 },
     headers: {
       Accept: "application/vnd.github.v3+json",
       "User-Agent": "DevScan-Dashboard",
     },
-  });
+  } as const;
+
+  const [userRes, repoRes, contributionData] = await Promise.all([
+    fetch(`https://api.github.com/users/${cleanUsername}`, githubFetchOptions),
+    fetch(
+      `https://api.github.com/users/${cleanUsername}/repos?sort=updated&per_page=100`,
+      githubFetchOptions,
+    ),
+    fetchContributions(cleanUsername),
+  ]);
 
   if (userRes.status === 404) {
     return (
@@ -69,7 +78,7 @@ export default async function ResultPage({ searchParams }: Props) {
             </p>
           </div>
           <div className="pt-2 flex justify-center">
-            <BackButton/>
+            <BackButton />
           </div>
         </Card>
       </main>
@@ -93,7 +102,7 @@ export default async function ResultPage({ searchParams }: Props) {
             </p>
           </div>
           <div className="pt-2 flex justify-center">
-            <BackButton/>
+            <BackButton />
           </div>
         </Card>
       </main>
@@ -115,7 +124,7 @@ export default async function ResultPage({ searchParams }: Props) {
             again later.
           </p>
           <div className="pt-2 flex justify-center">
-            <BackButton/>
+            <BackButton />
           </div>
         </Card>
       </main>
@@ -123,18 +132,6 @@ export default async function ResultPage({ searchParams }: Props) {
   }
 
   const user: GitHubUser = await userRes.json();
-
-  // Fetch Repositories
-  const repoRes = await fetch(
-    `https://api.github.com/users/${cleanUsername}/repos?sort=updated&per_page=100`,
-    {
-      next: { revalidate: 3600 },
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-        "User-Agent": "DevScan-Dashboard",
-      },
-    },
-  );
 
   const rawRepos: GitHubRepo[] = repoRes.ok ? await repoRes.json() : [];
 
@@ -158,7 +155,7 @@ export default async function ResultPage({ searchParams }: Props) {
       {/* ── Top Navigation Bar ── */}
       <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <BackButton/>
+          <BackButton />
 
           <div className="flex items-center gap-2">
             <span className="hidden sm:inline-flex text-xs text-zinc-500 font-mono">
@@ -167,7 +164,6 @@ export default async function ResultPage({ searchParams }: Props) {
             <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
           </div>
         </div>
-        
       </header>
 
       {/* ── 1. Hero Cover Section (Edge-to-Edge) ── */}
@@ -180,6 +176,11 @@ export default async function ResultPage({ searchParams }: Props) {
           publicRepos={user.public_repos}
           followers={user.followers}
           following={user.following}
+        />
+
+        <ContributionStreaks
+          contributions={contributionData.contributions}
+          totalContributions={contributionData.totalContributions}
         />
 
         {/* ── 3. Top Languages Constellation ── */}

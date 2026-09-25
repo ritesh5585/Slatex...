@@ -27,11 +27,11 @@ export default function Home() {
           `/repo?owner=${encodeURIComponent(parts[0])}&repo=${encodeURIComponent(parts[1])}`,
         );
       } else {
-        // sirf username URL hai → /result pe bhejo
-        router.push(`/result?username=${encodeURIComponent(parts[0])}`);
+        // sirf username URL hai → /profiles pe bhejo
+        router.push(`/profiles?username=${encodeURIComponent(parts[0])}`);
       }
     } else {
-      router.push(`/result?username=${encodeURIComponent(Username)}`);
+      router.push(`/profiles?username=${encodeURIComponent(Username)}`);
     }
     setIsLoading(false);
   }

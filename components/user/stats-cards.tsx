@@ -22,7 +22,7 @@ function StatCard({ children }: { children: ReactNode }) {
 }
 
 // Shared label style
-const LABEL = "text-xs font-medium uppercase tracking-wider text-zinc-400";
+const LABEL = "text-sm font-medium uppercase tracking-wider text-zinc-400";
 const NUMBER = "font-bold tracking-tight text-white tabular-nums";
 
 // Reusable fade-up motion variant
@@ -38,27 +38,29 @@ export function StatsCards({
   following,
 }: StatsCardsProps) {
   return (
-    <section className="w-full">
-      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4">
+    <section className="flex w-full justify-center">
+      <div className="grid w-full max-w-[1400px] grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
         {/* ── Repos Card ── */}
-        <motion.div {...fadeUp(0.15)}>
+        <motion.div className="md:col-span-2" {...fadeUp(0.15)}>
           <StatCard>
-            <div className="flex items-center gap-5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10 ring-1 ring-blue-500/20">
-                <BookOpen className="h-5 w-5 text-blue-400" />
+            <div className="flex items-center justify-center gap-5 sm:gap-7 md:gap-8">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/10 ring-1 ring-blue-500/20 sm:h-20 sm:w-20">
+                <BookOpen className="h-8 w-8 text-blue-400 sm:h-9 sm:w-9" />
               </div>
-              <div>
-                <div className={`text-4xl ${NUMBER}`}>
+              <div className="text-center">
+                <div className={`text-5xl sm:text-6xl md:text-7xl ${NUMBER}`}>
                   {publicRepos.toLocaleString()}
                 </div>
-                <div className={LABEL}>Public Repositories</div>
+                <div className={`${LABEL} mt-2 text-base tracking-[0.18em] sm:text-lg`}>
+                  Public Repositories
+                </div>
               </div>
             </div>
           </StatCard>
         </motion.div>
 
         {/* ── Community Card ── */}
-        <motion.div {...fadeUp(0.23)}>
+        <motion.div className="md:col-span-2" {...fadeUp(0.23)}>
           <StatCard>
             <div className="mb-4 flex items-center gap-3 text-indigo-400">
               <Users className="h-6 w-6" />
