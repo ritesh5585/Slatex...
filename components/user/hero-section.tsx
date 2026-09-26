@@ -71,7 +71,7 @@ export function HeroSection({ user }: HeroSectionProps) {
         <div className="hero-glow" />
 
         {/* ── 1. Cover Banner (edge-to-edge) ── */}
-        <div className="relative h-[220px] w-full sm:h-[260px] md:h-[280px] overflow-hidden bg-zinc-950">
+        <div className="relative h-55 w-full sm:h-65 md:h-70 overflow-hidden bg-zinc-950">
           {/* Subtle Gradient Mesh Background */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(59,130,246,0.3),rgba(99,102,241,0.2),rgba(147,51,234,0.1),transparent)]" />
 
