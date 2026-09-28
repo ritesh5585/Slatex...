@@ -132,6 +132,7 @@ export default async function ResultPage({ searchParams }: Props) {
   }
 
   const user: GitHubUser = await userRes.json();
+  console.log("Fetched user data:", user);
 
   const rawRepos: GitHubRepo[] = repoRes.ok ? await repoRes.json() : [];
 

@@ -18,7 +18,9 @@ interface GitHubPublicEvent {
   };
 }
 
-async function fetchPublicActivity(username: string): Promise<ContributionData> {
+async function fetchPublicActivity(
+  username: string,
+): Promise<ContributionData> {
   try {
     const res = await fetch(
       `https://api.github.com/users/${username}/events/public?per_page=100`,
@@ -53,7 +55,10 @@ async function fetchPublicActivity(username: string): Promise<ContributionData> 
 
     return {
       contributions,
-      totalContributions: contributions.reduce((sum, day) => sum + day.count, 0),
+      totalContributions: contributions.reduce(
+        (sum, day) => sum + day.count,
+        0,
+      ),
     };
   } catch (error) {
     console.error("Public activity fetch failed:", error);
