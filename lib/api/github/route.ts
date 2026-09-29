@@ -1,13 +1,21 @@
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const username = searchParams.get("username");
+import { NextResponse } from "next/server";
+import { getUserByUsername, GitHubGraphQLError } from "@/lib/api/github";
 
-  if (!username) {
-    return Response.json({ error: "Username required" }, { status: 400 });
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ username: string }> },
+) {
+  const { username } = await params;
+  try {
+    const user = await getUserByUsername(username);
+    return NextResponse.json(user);
+  } catch (err) {
+    if (err instanceof GitHubGraphQLError) {
+      return NextResponse.json(
+        { error: err.message },
+        { status: err.status || 500 },
+      );
+    }
+    return NextResponse.json({ error: "Unknown error" }, { status: 500 });
   }
-
-  const res = await fetch(`https://api.github.com/users/${username}`);
-  const data = await res.json();
-  
-  return Response.json(data);
 }
