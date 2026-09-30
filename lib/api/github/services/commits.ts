@@ -15,6 +15,7 @@ interface CommitHistoryResponse {
 export async function getCommitHistory(
   owner: string,
   name: string,
+  first: number = 100, 
   since?: string,
 ) {
   const data = await githubGraphQL<CommitHistoryResponse>(
@@ -22,6 +23,7 @@ export async function getCommitHistory(
     {
       owner,
       name,
+      first,
       since: since ?? null,
     },
   );

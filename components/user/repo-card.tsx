@@ -8,7 +8,7 @@ import { getLanguageColor } from "@/lib/language-colors";
 import Link from "next/link";
 
 export interface GitHubRepo {
-  id: number;
+  id: string;
   name: string;
   owner: {
     login: string;

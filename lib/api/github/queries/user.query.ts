@@ -15,7 +15,7 @@ export const GET_USER_QUERY = `
       url
     }
   }
-`
+`;
 export const GET_USER_REPOS_QUERY = `
   query GetUserRepos($username: String!) {
     user(login: $username) {
@@ -26,6 +26,7 @@ export const GET_USER_REPOS_QUERY = `
         privacy: PUBLIC
       ) {
         nodes {
+          id
           name
           description
           url
@@ -33,6 +34,7 @@ export const GET_USER_REPOS_QUERY = `
           forkCount
           updatedAt
           primaryLanguage { name color }
+          repositoryTopics(first: 10) { nodes { topic { name } } }
         }
       }
     }

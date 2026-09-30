@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
-import { getUserByUsername, GitHubGraphQLError } from "@/lib/api/github";
+import { getUserContributions, GitHubGraphQLError } from "@/lib/api/github";
 
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ username: string }> },
 ) {
   const { username } = await params;
+
   try {
-    const user = await getUserByUsername(username);
-    return NextResponse.json(user);
+    const data = await getUserContributions(username);
+    return NextResponse.json(data);
   } catch (err) {
     if (err instanceof GitHubGraphQLError) {
       return NextResponse.json(

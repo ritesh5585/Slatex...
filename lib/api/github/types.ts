@@ -54,6 +54,7 @@ export interface ContributionCalendar {
 }
 
 export interface GitHubUserRepoGQL {
+  id: string;
   name: string;
   description: string | null;
   url: string;
@@ -61,4 +62,5 @@ export interface GitHubUserRepoGQL {
   forkCount: number;
   updatedAt: string;
   primaryLanguage: { name: string; color: string } | null;
+  repositoryTopics: { nodes: { topic: { name: string } }[] };
 }
