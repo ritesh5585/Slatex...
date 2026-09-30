@@ -36,3 +36,13 @@ export const GET_REPO_LANGUAGES_QUERY = `
     }
   }
 `;
+
+export const GET_REPO_README_QUERY = `
+  query GetRepoReadme($owner: String!, $name: String!) {
+    repository(owner: $owner, name: $name) {
+      object(expression: "HEAD:README.md") {
+        ... on Blob { text }
+      }
+    }
+  }
+`;

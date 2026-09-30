@@ -1,81 +1,68 @@
 import Link from "next/link";
-import { ArrowLeft, AlertCircle, UserX } from "lucide-react";
+import { AlertCircle, ArrowLeft, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { RepoHeader } from "@/components/repo/repo-header";
-import { RepoStats } from "@/components/repo/repo-stats";
-import { LanguagePie } from "@/components/repo/language-pie";
-import { ContributorsList } from "@/components/repo/contributors-list";
+import { BackButton } from "@/components/shared/back-button";
 import { CommitActivity } from "@/components/repo/commit-activity";
 import { CommitTimeline } from "@/components/repo/commit-timeline";
+import { ContributorsList } from "@/components/repo/contributors-list";
+import { LanguagePie } from "@/components/repo/language-pie";
 import { ReadmeViewer } from "@/components/repo/readme-viewer";
-import type {
-  GitHubCommit,
-  GitHubCommitActivityWeek,
-  GitHubContributor,
-  GitHubRepository,
-} from "@/lib/github";
-import { BackButton } from "@/components/shared/back-button";
+import { RepoHeader } from "@/components/repo/repo-header";
+import { RepoStats } from "@/components/repo/repo-stats";
+import {
+  getCommitHistory,
+  getRepo,
+  getRepoLanguages,
+  getRepoReadme,
+  NotFoundError,
+  RateLimitError,
+} from "@/lib/api/github";
+import type { GitHubCommitActivityWeek, GitHubContributor } from "@/lib/github";
 
 interface Props {
   searchParams: Promise<{ owner?: string; repo?: string; url?: string }>;
 }
 
-const GH_HEADERS = {
-  Accept: "application/vnd.github.v3+json",
-  "User-Agent": "DevScan-Dashboard",
-};
-
-// ─── Helpers ───────────────────────────────────────────────
-function parseRepoParams(params: {
-  owner?: string;
-  repo?: string;
-  url?: string;
-}): { owner?: string; repoName?: string } {
-  let owner = params.owner?.trim();
-  let repoName = params.repo?.trim();
-
-  // Agar URL diya hai aur owner/repo nahi — URL se parse karo
-  if (params.url && (!owner || !repoName)) {
-    try {
-      const cleanUrl = params.url.startsWith("http")
-        ? params.url
-        : `https://${params.url}`;
-      const u = new URL(cleanUrl);
-      const parts = u.pathname.replace(/^\//, "").split("/");
-      owner = parts[0];
-      repoName = parts[1]?.replace(/\.git$/, "");
-    } catch {
-      // Invalid URL — silent fail, niche validation handle karegi
-    }
+function parseRepoParams({ owner, repo, url }: Awaited<Props["searchParams"]>) {
+  if (owner?.trim() && repo?.trim()) {
+    return { owner: owner.trim(), name: repo.trim().replace(/\.git$/, "") };
   }
 
-  return { owner, repoName };
+  if (!url) return { owner: "", name: "" };
+
+  try {
+    const parsed = new URL(url.startsWith("http") ? url : `https://${url}`);
+    const [parsedOwner = "", parsedName = ""] = parsed.pathname
+      .split("/")
+      .filter(Boolean);
+    return { owner: parsedOwner, name: parsedName.replace(/\.git$/, "") };
+  } catch {
+    return { owner: "", name: "" };
+  }
 }
 
-// ─── Reusable Error Shell ──────────────────────────────────
 function ErrorShell({
   icon,
-  iconClass,
-  ringClass,
-  bgClass,
   title,
   description,
-  ctaLabel = "Back to Search",
+  tone = "red",
 }: {
   icon: React.ReactNode;
-  iconClass: string;
-  ringClass: string;
-  bgClass: string;
   title: string;
   description: React.ReactNode;
-  ctaLabel?: string;
+  tone?: "amber" | "red";
 }) {
+  const colors =
+    tone === "amber"
+      ? "bg-amber-500/10 text-amber-400 ring-amber-500/20"
+      : "bg-red-500/10 text-red-400 ring-red-500/20";
+
   return (
-    <main className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
-      <Card className="max-w-md w-full p-8 text-center border-zinc-800 bg-zinc-900/60 space-y-4">
+    <main className="flex min-h-screen items-center justify-center bg-zinc-950 p-4">
+      <Card className="w-full max-w-md space-y-4 border-zinc-800 bg-zinc-900/60 p-8 text-center">
         <div
-          className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${bgClass} ${iconClass} ring-1 ${ringClass}`}
+          className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ring-1 ${colors}`}
         >
           {icon}
         </div>
@@ -86,7 +73,7 @@ function ErrorShell({
         <Link href="/">
           <Button variant="outline" className="gap-2">
             <ArrowLeft className="h-4 w-4" />
-            {ctaLabel}
+            Back to Search
           </Button>
         </Link>
       </Card>
@@ -94,177 +81,130 @@ function ErrorShell({
   );
 }
 
-// ─── Page ──────────────────────────────────────────────────
 export default async function RepoPage({ searchParams }: Props) {
-  const params = await searchParams;
-  const { owner, repoName } = parseRepoParams(params);
-
-  // Validation
-  if (!owner || !repoName) {
+  const { owner, name } = parseRepoParams(await searchParams);
+  if (!owner || !name) {
     return (
       <ErrorShell
         icon={<AlertCircle className="h-7 w-7" />}
-        iconClass="text-amber-400"
-        ringClass="ring-amber-500/20"
-        bgClass="bg-amber-500/10"
         title="Invalid Repository"
-        description="Provide a GitHub repo URL or owner + name."
+        description="Provide a GitHub repo URL or owner and repository name."
+        tone="amber"
       />
     );
   }
 
-  // ── Parallel Fetch ──
-  const [repoRes, langRes, contribRes, commitRes, activityRes, readmeRes] =
-    await Promise.all([
-      fetch(`https://api.github.com/repos/${owner}/${repoName}`, {
-        next: { revalidate: 3600 },
-        headers: GH_HEADERS,
-      }),
-      fetch(`https://api.github.com/repos/${owner}/${repoName}/languages`, {
-        next: { revalidate: 3600 },
-        headers: GH_HEADERS,
-      }),
+  const headers = {
+    Accept: "application/vnd.github+json",
+    "User-Agent": "DevScan-Dashboard",
+    ...(process.env.GITHUB_TOKEN && {
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+    }),
+  };
+
+  try {
+    const [
+      repo,
+      languageEdges,
+      commits,
+      readme,
+      contributorsResponse,
+      activityResponse,
+    ] = await Promise.all([
+      getRepo(owner, name),
+      getRepoLanguages(owner, name),
+      getCommitHistory(owner, name, 30),
+      getRepoReadme(owner, name),
       fetch(
-        `https://api.github.com/repos/${owner}/${repoName}/contributors?per_page=10`,
-        { next: { revalidate: 3600 }, headers: GH_HEADERS },
+        `https://api.github.com/repos/${owner}/${name}/contributors?per_page=10`,
+        {
+          headers,
+          next: { revalidate: 3600 },
+        },
       ),
       fetch(
-        `https://api.github.com/repos/${owner}/${repoName}/commits?per_page=100`,
-        { next: { revalidate: 300 }, headers: GH_HEADERS },
+        `https://api.github.com/repos/${owner}/${name}/stats/commit_activity`,
+        {
+          headers,
+          next: { revalidate: 1800 },
+        },
       ),
-      fetch(
-        `https://api.github.com/repos/${owner}/${repoName}/stats/commit_activity`,
-        { next: { revalidate: 1800 }, headers: GH_HEADERS },
-      ),
-      fetch(`https://api.github.com/repos/${owner}/${repoName}/readme`, {
-        next: { revalidate: 3600 },
-        headers: GH_HEADERS,
-      }),
     ]);
 
-  // ── Error Handling ──
-  if (repoRes.status === 404) {
-    return (
-      <ErrorShell
-        icon={<UserX className="h-7 w-7" />}
-        iconClass="text-red-400"
-        ringClass="ring-red-500/20"
-        bgClass="bg-red-500/10"
-        title="Repository Not Found"
-        description={
-          <>
-            <span className="text-zinc-200 font-semibold">
-              {owner}/{repoName}
-            </span>{" "}
-            is private or does not exist.
-          </>
-        }
-      />
+    const [contributorData, activityData] = await Promise.all([
+      contributorsResponse.ok ? contributorsResponse.json() : [],
+      activityResponse.ok ? activityResponse.json() : [],
+    ]);
+    const contributors: GitHubContributor[] = Array.isArray(contributorData)
+      ? contributorData
+      : [];
+    const activity: GitHubCommitActivityWeek[] = Array.isArray(activityData)
+      ? activityData.slice(-13)
+      : [];
+    const languages = Object.fromEntries(
+      languageEdges.map(({ node, size }) => [node.name, size]),
     );
-  }
 
-  if (repoRes.status === 403) {
     return (
-      <ErrorShell
-        icon={<AlertCircle className="h-7 w-7" />}
-        iconClass="text-amber-400"
-        ringClass="ring-amber-500/20"
-        bgClass="bg-amber-500/10"
-        title="API Rate Limit Reached"
-        description="GitHub API hourly limit reached. Please wait a minute and reload."
-      />
-    );
-  }
+      <main className="min-h-screen bg-zinc-950 pb-24 text-zinc-100 antialiased selection:bg-blue-500/30 selection:text-blue-200">
+        <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-xl">
+          <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
+            <BackButton />
+            <span className="hidden font-mono text-xs text-zinc-500 sm:inline-flex">
+              github.com/{owner}/{name}
+            </span>
+          </div>
+        </header>
 
-  if (!repoRes.ok) {
-    return (
-      <ErrorShell
-        icon={<AlertCircle className="h-7 w-7" />}
-        iconClass="text-red-400"
-        ringClass="ring-red-500/20"
-        bgClass="bg-red-500/10"
-        title="Unable to Fetch Repository"
-        description="An error occurred while fetching repo details. Please try again."
-      />
-    );
-  }
-  
-
-  // ── Parse Data ──
-  const repo: GitHubRepository = await repoRes.json();
-  const languages: Record<string, number> = langRes.ok
-    ? await langRes.json()
-    : {};
-  const contributors: GitHubContributor[] = contribRes.ok
-    ? await contribRes.json()
-    : [];
-  const commits: GitHubCommit[] = commitRes.ok ? await commitRes.json() : [];
-
-  const rawActivity = activityRes.ok ? await activityRes.json() : [];
-  const activity: GitHubCommitActivityWeek[] = Array.isArray(rawActivity)
-    ? rawActivity.slice(-26)
-    : [];
-
-  let readmeContent = "";
-  if (readmeRes.ok) {
-    const readmeData = await readmeRes.json();
-    readmeContent = readmeData.content
-      ? Buffer.from(readmeData.content, "base64").toString("utf-8")
-      : "";
-  }
-
-  // ── Render ──
-  return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 antialiased pb-24 selection:bg-blue-500/30 selection:text-blue-200">
-      {/* Sticky Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <BackButton />
-          <span className="hidden sm:inline-flex text-xs text-zinc-500 font-mono">
-            github.com/{owner}/{repoName}
-          </span>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
-        {/* 1. Header */}
-        <RepoHeader repo={repo} owner={owner} />
-
-        {/* 2. Stats */}
-        <RepoStats repo={repo} />
-
-        {/* 3. Contribution grid (six months) */}
-        <CommitActivity activity={activity} />
-
-        {/* 4. Languages + Contributors (side by side on desktop) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
+        <div className="mx-auto max-w-5xl space-y-8 px-4 pt-8 sm:px-6 lg:px-8">
+          <RepoHeader repo={repo} />
+          <RepoStats repo={repo} />
+          <CommitActivity activity={activity} />
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <LanguagePie languages={languages} />
+            <div className="lg:col-span-2">
+              <ContributorsList contributors={contributors} />
+            </div>
           </div>
-          <div className="lg:col-span-2">
-            <ContributorsList contributors={contributors} />
-          </div>
+          <CommitTimeline commits={commits} owner={owner} repoName={name} />
+          <ReadmeViewer
+            content={readme ?? ""}
+            owner={owner}
+            repoName={name}
+            branch={repo.defaultBranchRef?.name}
+          />
+          <footer className="border-t border-zinc-900/80 pt-12 text-center text-xs text-zinc-600">
+            Repository dashboard generated from public GitHub data.
+          </footer>
         </div>
-
-        {/* 5. Recent Commits Timeline */}
-        <CommitTimeline commits={commits} owner={owner} repoName={repoName} />
-
-        {/* 6. README */}
-        <ReadmeViewer
-          content={readmeContent}
-          owner={owner}
-          repoName={repoName}
+      </main>
+    );
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      return (
+        <ErrorShell
+          icon={<UserX className="h-7 w-7" />}
+          title="Repository Not Found"
+          description={`${owner}/${name} is private or does not exist.`}
         />
-
-        {/* Footer */}
-        <footer className="pt-12 text-center text-xs text-zinc-600 border-t border-zinc-900/80">
-          <p>
-            Repository dashboard generated from public GitHub data • Inspired by
-            Linear & Vercel
-          </p>
-        </footer>
-      </div>
-    </main>
-  );
+      );
+    }
+    if (error instanceof RateLimitError) {
+      return (
+        <ErrorShell
+          icon={<AlertCircle className="h-7 w-7" />}
+          title="API Rate Limit Reached"
+          description="GitHub's API rate limit was reached. Please try again later."
+          tone="amber"
+        />
+      );
+    }
+    return (
+      <ErrorShell
+        icon={<AlertCircle className="h-7 w-7" />}
+        title="Unable to Fetch Repository"
+        description="GitHub data could not be loaded. Please try again."
+      />
+    );
+  }
 }

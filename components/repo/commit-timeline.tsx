@@ -1,10 +1,10 @@
 import { GitCommit, ExternalLink, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { GitHubCommit } from "@/lib/github";
+import type { CommitNode } from "@/lib/api/github";
 
 interface Props {
-  commits: GitHubCommit[];
+  commits: CommitNode[];
   owner: string;
   repoName: string;
 }
@@ -17,7 +17,10 @@ function timeAgo(date: string) {
   if (hrs < 24) return `${hrs}h ago`;
   const days = Math.floor(hrs / 24);
   if (days < 30) return `${days}d ago`;
-  return new Date(date).toLocaleDateString("en-IN", { month: "short", day: "numeric" });
+  return new Date(date).toLocaleDateString("en-IN", {
+    month: "short",
+    day: "numeric",
+  });
 }
 
 // Commit type detect — "feat:", "fix:", "chore:", etc.
@@ -55,17 +58,19 @@ export function CommitTimeline({ commits, owner, repoName }: Props) {
 
       <div className="relative space-y-1">
         {/* Vertical timeline line */}
-        <div className="absolute left-[19px] top-3 bottom-3 w-px bg-gradient-to-b from-blue-500/40 via-zinc-800 to-transparent" />
+        <div className="absolute left-4.75 top-3 bottom-3 w-px bg-linear-to-b from-blue-500/40 via-zinc-800 to-transparent" />
 
         {commits.slice(0, 8).map((commit) => {
-          const msg = commit.commit.message.split("\n")[0];
+          const msg = commit.message.split("\n")[0];
           const type = getCommitType(msg);
-          const typeColor = type ? TYPE_COLORS[type] || TYPE_COLORS.chore : null;
+          const typeColor = type
+            ? TYPE_COLORS[type] || TYPE_COLORS.chore
+            : null;
 
           return (
             <a
-              key={commit.sha}
-              href={commit.html_url || `https://github.com/${owner}/${repoName}/commit/${commit.sha}`}
+              key={commit.oid}
+              href={`https://github.com/${owner}/${repoName}/commit/${commit.oid}`}
               target="_blank"
               rel="noreferrer"
               className="relative flex items-start gap-4 py-3 pr-2 rounded-lg hover:bg-zinc-900/60 transition-colors"
@@ -85,13 +90,15 @@ export function CommitTimeline({ commits, owner, repoName }: Props) {
                 </div>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
                   <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
-                    {commit.sha.slice(0, 7)}
+                    {commit.oid.slice(0, 7)}
                   </span>
                   <span className="text-zinc-400">
-                    {commit.commit.author?.name ?? commit.author?.login ?? "Unknown author"}
+                    {commit.author?.name ??
+                      commit.author?.user?.login ??
+                      "Unknown author"}
                   </span>
                   <span>•</span>
-                  <span>{commit.commit.author ? timeAgo(commit.commit.author.date) : "Unknown time"}</span>
+                  <span>{timeAgo(commit.committedDate)}</span>
                 </div>
               </div>
 

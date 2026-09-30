@@ -36,11 +36,16 @@ export interface GitHubRepoGQL {
 }
 
 export interface CommitNode {
+  oid: string;
   committedDate: string;
   additions: number;
   deletions: number;
   message: string;
-  author: { name: string | null; avatarUrl: string | null } | null;
+  author: {
+    name: string | null;
+    avatarUrl: string | null;
+    user: { login: string; url: string } | null;
+  } | null;
 }
 
 export interface ContributionDay {

@@ -17,6 +17,8 @@ interface Props {
 
 const WEEKDAYS = ["", "Mon", "", "Wed", "", "Fri", ""];
 const WEEKS_TO_SHOW = 13;
+const formatDate = (date: Date, options: Intl.DateTimeFormatOptions = {}) =>
+  date.toLocaleDateString("en-IN", { timeZone: "UTC", ...options });
 
 export function CommitActivity({ activity }: Props) {
   const [hovered, setHovered] = useState<{
@@ -25,54 +27,46 @@ export function CommitActivity({ activity }: Props) {
   } | null>(null);
 
   // ── Normalize + memoize data ──
-  const {
-    weeks,
-    total,
-    maxDay,
-    average,
-    trend,
-    startDate,
-    endDate,
-    hasData,
-  } = useMemo(() => {
-    const safe = Array.isArray(activity) ? activity : [];
-    const sliced = safe.slice(-WEEKS_TO_SHOW);
+  const { weeks, total, maxDay, average, trend, startDate, endDate, hasData } =
+    useMemo(() => {
+      const safe = Array.isArray(activity) ? activity : [];
+      const sliced = safe.slice(-WEEKS_TO_SHOW);
 
-    // Guarantee every week has exactly 7 days
-    const normalized = sliced.map((week) => {
-      const days = Array.isArray(week?.days) ? week.days : [];
-      const padded = Array.from({ length: 7 }, (_, i) => days[i] ?? 0);
-      return { week: week.week, days: padded, total: week.total ?? 0 };
-    });
+      // Guarantee every week has exactly 7 days
+      const normalized = sliced.map((week) => {
+        const days = Array.isArray(week?.days) ? week.days : [];
+        const padded = Array.from({ length: 7 }, (_, i) => days[i] ?? 0);
+        return { week: week.week, days: padded, total: week.total ?? 0 };
+      });
 
-    const total = normalized.reduce((sum, w) => sum + w.total, 0);
-    const allDays = normalized.flatMap((w) => w.days);
-    const maxDay = allDays.length ? Math.max(...allDays) : 0;
-    const average = normalized.length
-      ? (total / normalized.length).toFixed(1)
-      : "0.0";
-    const latest = normalized.at(-1)?.total ?? 0;
-    const prev = normalized.at(-2)?.total ?? 0;
-    const trend = latest - prev;
-    const startDate = normalized[0]
-      ? new Date(normalized[0].week * 1000)
-      : null;
-    const endDate = normalized.at(-1)
-      ? new Date(normalized.at(-1)!.week * 1000)
-      : null;
-    const hasData = normalized.some((w) => w.total > 0);
+      const total = normalized.reduce((sum, w) => sum + w.total, 0);
+      const allDays = normalized.flatMap((w) => w.days);
+      const maxDay = allDays.length ? Math.max(...allDays) : 0;
+      const average = normalized.length
+        ? (total / normalized.length).toFixed(1)
+        : "0.0";
+      const latest = normalized.at(-1)?.total ?? 0;
+      const prev = normalized.at(-2)?.total ?? 0;
+      const trend = latest - prev;
+      const startDate = normalized[0]
+        ? new Date(normalized[0].week * 1000)
+        : null;
+      const endDate = normalized.at(-1)
+        ? new Date(normalized.at(-1)!.week * 1000)
+        : null;
+      const hasData = normalized.some((w) => w.total > 0);
 
-    return {
-      weeks: normalized,
-      total,
-      maxDay,
-      average,
-      trend,
-      startDate,
-      endDate,
-      hasData,
-    };
-  }, [activity]);
+      return {
+        weeks: normalized,
+        total,
+        maxDay,
+        average,
+        trend,
+        startDate,
+        endDate,
+        hasData,
+      };
+    }, [activity]);
 
   const intensity = (count: number) => {
     if (!count) return "bg-zinc-800/60";
@@ -164,13 +158,14 @@ export function CommitActivity({ activity }: Props) {
             {/* Month axis */}
             <div className="flex items-center justify-between pl-8 pr-1 text-[10px] font-medium text-zinc-500">
               <span>
-                {startDate?.toLocaleDateString("en-IN", { month: "short" })}
+                {startDate && formatDate(startDate, { month: "short" })}
               </span>
               <span>
-                {endDate?.toLocaleDateString("en-IN", {
-                  month: "short",
-                  year: "numeric",
-                })}
+                {endDate &&
+                  formatDate(endDate, {
+                    month: "short",
+                    year: "numeric",
+                  })}
               </span>
             </div>
 
@@ -200,13 +195,11 @@ export function CommitActivity({ activity }: Props) {
                           <button
                             key={`${wi}-${day}`}
                             type="button"
-                            onMouseEnter={() =>
-                              setHovered({ count, date })
-                            }
+                            onMouseEnter={() => setHovered({ count, date })}
                             onMouseLeave={() => setHovered(null)}
                             onFocus={() => setHovered({ count, date })}
                             onBlur={() => setHovered(null)}
-                            aria-label={`${count} commits on ${date.toLocaleDateString()}`}
+                            aria-label={`${count} commits on ${formatDate(date)}`}
                             className={`h-3 w-3 rounded-[3px] ring-1 ring-inset ring-white/5 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-emerald-400 ${intensity(
                               count,
                             )} ${
@@ -232,7 +225,7 @@ export function CommitActivity({ activity }: Props) {
                       {hovered.count}
                     </span>{" "}
                     commit{hovered.count === 1 ? "" : "s"} ·{" "}
-                    {hovered.date.toLocaleDateString("en-IN", {
+                    {formatDate(hovered.date, {
                       day: "numeric",
                       month: "short",
                     })}
@@ -308,7 +301,7 @@ function EmptyState() {
       <div className="inline-flex rounded-full bg-zinc-800/60 p-3 text-zinc-500 ring-1 ring-zinc-700/50">
         <CalendarDays className="h-5 w-5" />
       </div>
-      <div className="max-w-[260px]">
+      <div className="max-w-65">
         <p className="text-sm font-semibold text-zinc-200">
           No activity in the last 3 months
         </p>

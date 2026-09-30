@@ -31,7 +31,10 @@ export async function getRepo(
   return data.repository;
 }
 
-export async function getRepoLanguages(owner: string, name: string) {
+export async function getRepoLanguages(
+  owner: string,
+  name: string,
+): Promise<{ size: number; node: { name: string; color: string } }[]> {
   const data = await githubGraphQL<LanguagesResponse>(
     GET_REPO_LANGUAGES_QUERY,
     { owner, name },

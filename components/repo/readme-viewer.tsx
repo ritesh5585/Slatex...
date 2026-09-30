@@ -10,16 +10,30 @@ interface Props {
   content: string;
   owner?: string;
   repoName?: string;
+  branch?: string;
 }
 
-export function ReadmeViewer({ content, owner, repoName }: Props) {
+function resolveReadmePath(path: string | undefined, base: string) {
+  if (!path || /^(?:[a-z][a-z\d+.-]*:|\/\/|#)/i.test(path)) return path ?? "";
+  return new URL(path.replace(/^\.\//, "").replace(/^\//, ""), base).toString();
+}
+
+export function ReadmeViewer({
+  content,
+  owner,
+  repoName,
+  branch = "HEAD",
+}: Props) {
   const [expanded, setExpanded] = useState(false);
 
   if (!content) return null;
 
-  const githubBase = owner && repoName
-    ? `https://github.com/${owner}/${repoName}/blob/HEAD/`
-    : "";
+  const repositoryPath =
+    owner && repoName
+      ? `${owner}/${repoName}/${encodeURIComponent(branch)}/`
+      : "";
+  const githubBase = `https://github.com/${repositoryPath ? `${owner}/${repoName}/blob/${encodeURIComponent(branch)}/` : ""}`;
+  const rawBase = `https://raw.githubusercontent.com/${repositoryPath}`;
 
   return (
     <Card className="overflow-hidden">
@@ -48,9 +62,11 @@ export function ReadmeViewer({ content, owner, repoName }: Props) {
 
       {/* Content */}
       <div className="relative px-5 py-6 sm:px-8">
-        <div className={`overflow-hidden transition-[max-height] duration-500 ${expanded ? "max-h-none" : "max-h-120"}`}>
-        <article
-          className="prose prose-invert max-w-3xl prose-sm sm:prose-base
+        <div
+          className={`overflow-hidden transition-[max-height] duration-500 ${expanded ? "max-h-none" : "max-h-120"}`}
+        >
+          <article
+            className="prose prose-invert max-w-3xl prose-sm sm:prose-base
             prose-headings:text-white prose-headings:font-semibold prose-headings:tracking-tight
             prose-h1:text-2xl prose-h1:border-b prose-h1:border-zinc-800 prose-h1:pb-2 prose-h1:mb-4
             prose-h2:text-xl prose-h2:border-b prose-h2:border-zinc-800 prose-h2:pb-2 prose-h2:mt-8
@@ -75,36 +91,37 @@ export function ReadmeViewer({ content, owner, repoName }: Props) {
             [&_summary]:cursor-pointer [&_summary]:text-zinc-200 [&_summary]:font-medium
             [&_input[type=checkbox]]:accent-blue-500 [&_input[type=checkbox]]:mr-2
             prose-p:my-4 prose-headings:scroll-mt-20"
-        >
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              a: ({ href, children, ...props }) => (
-                <a
-                  href={href?.startsWith("http") ? href : `${githubBase}${href?.replace(/^\.\//, "") || ""}`}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  {...props}
-                >
-                  {children}
-                </a>
-              ),
-              img: ({ src, alt, ...props }) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={typeof src === "string" && src.startsWith("http")
-                    ? src
-                    : `${githubBase}${typeof src === "string" ? src.replace(/^\.\//, "") : ""}`}
-                  alt={alt || ""}
-                  loading="lazy"
-                  {...props}
-                />
-              ),
-            }}
           >
-            {content}
-          </ReactMarkdown>
-        </article>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                a: ({ href, children, ...props }) => (
+                  <a
+                    href={resolveReadmePath(href, githubBase)}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    {...props}
+                  >
+                    {children}
+                  </a>
+                ),
+                img: ({ src, alt, ...props }) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={resolveReadmePath(
+                      typeof src === "string" ? src : undefined,
+                      rawBase,
+                    )}
+                    alt={alt || ""}
+                    loading="lazy"
+                    {...props}
+                  />
+                ),
+              }}
+            >
+              {content}
+            </ReactMarkdown>
+          </article>
         </div>
         {!expanded && (
           <div className="pointer-events-none absolute inset-x-0 bottom-16 h-28 bg-linear-to-t from-zinc-900 via-zinc-900/80 to-transparent" />
@@ -116,7 +133,11 @@ export function ReadmeViewer({ content, owner, repoName }: Props) {
           className="relative mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800/70 px-4 py-3 text-sm font-medium text-zinc-200 transition-colors hover:border-blue-500/50 hover:bg-blue-500/10 hover:text-white"
         >
           {expanded ? "Show less" : "Read full README"}
-          {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          {expanded ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
         </button>
       </div>
     </Card>

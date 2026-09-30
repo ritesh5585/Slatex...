@@ -5,3 +5,4 @@ export * from "./services/users";
 export * from "./services/repos";
 export * from "./services/commits";
 export * from "./services/contributions";
+export * from "./services/readme";
