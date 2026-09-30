@@ -1,0 +1,1 @@
+export { GET } from "@/lib/api/github/route";

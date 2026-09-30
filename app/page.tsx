@@ -22,7 +22,6 @@ export default function Home() {
         .filter(Boolean);
 
       if (parts.length >= 2) {
-        
         router.push(
           `/repo?owner=${encodeURIComponent(parts[0])}&repo=${encodeURIComponent(parts[1])}`,
         );
@@ -85,7 +84,7 @@ export default function Home() {
               disabled={isLoading || !input.trim()}
               className=" flex w-10 rounded-xl px-2 py-2 mt-0.5 text-sm font-semibold gap-1.5 shrink-0"
             >
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4" suppressHydrationWarning />
             </Button>
           </div>
         </form>

@@ -15,4 +15,26 @@ export const GET_USER_QUERY = `
       url
     }
   }
+`
+export const GET_USER_REPOS_QUERY = `
+  query GetUserRepos($username: String!) {
+    user(login: $username) {
+      repositories(
+        first: 20
+        ownerAffiliations: OWNER
+        orderBy: { field: UPDATED_AT, direction: DESC }
+        privacy: PUBLIC
+      ) {
+        nodes {
+          name
+          description
+          url
+          stargazerCount
+          forkCount
+          updatedAt
+          primaryLanguage { name color }
+        }
+      }
+    }
+  }
 `;

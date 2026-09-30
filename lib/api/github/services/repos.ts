@@ -9,6 +9,7 @@ import type { GitHubRepoGQL } from "../types";
 interface RepoResponse {
   repository: GitHubRepoGQL | null;
 }
+
 interface LanguagesResponse {
   repository: {
     languages: {

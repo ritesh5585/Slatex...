@@ -10,7 +10,9 @@ interface UserResponse {
 export async function getUserByUsername(
   username: string,
 ): Promise<GitHubUserGQL> {
+
   const data = await githubGraphQL<UserResponse>(GET_USER_QUERY, { username });
+  
   if (!data.user) throw new NotFoundError(`User "${username}"`);
   return data.user;
 }

@@ -52,3 +52,13 @@ export interface ContributionCalendar {
   totalContributions: number;
   weeks: { contributionDays: ContributionDay[] }[];
 }
+
+export interface GitHubUserRepoGQL {
+  name: string;
+  description: string | null;
+  url: string;
+  stargazerCount: number;
+  forkCount: number;
+  updatedAt: string;
+  primaryLanguage: { name: string; color: string } | null;
+}
