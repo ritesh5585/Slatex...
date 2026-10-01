@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #09090b;
+  --background: #08090f;
   --foreground: #f4f4f5;
   --card: rgba(24, 24, 27, 0.6);
   --card-foreground: #f4f4f5;
@@ -75,7 +75,7 @@ body {
   box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.6), 0 0 20px -5px rgba(59, 130, 246, 0.05);
 }
 
-/* Hero mesh glow background */
+/* Hero mesh glow background - darker, subtler blue from earlier */
 .hero-glow {
   position: absolute;
   top: -120px;
@@ -84,17 +84,19 @@ body {
   width: 100%;
   max-width: 1000px;
   height: 480px;
-  background: radial-gradient(circle at center,
-      rgba(59, 130, 246, 0.18) 0%,
-      rgba(99, 102, 241, 0.12) 35%,
-      rgba(147, 51, 234, 0.06) 65%,
-      transparent 80%);
+  background: radial-gradient(
+    circle at center,
+    rgba(59, 130, 246, 0.18) 0%,
+    rgba(99, 102, 241, 0.12) 35%,
+    rgba(147, 51, 234, 0.06) 65%,
+    transparent 80%
+  );
   filter: blur(60px);
   pointer-events: none;
   z-index: 0;
 }
 
 .hero-grid {
-  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.4) 1px, transparent 0);
+  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.15) 1px, transparent 0);
   background-size: 32px 32px;
 }
