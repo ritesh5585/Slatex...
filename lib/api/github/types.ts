@@ -69,3 +69,34 @@ export interface GitHubUserRepoGQL {
   primaryLanguage: { name: string; color: string } | null;
   repositoryTopics: { nodes: { topic: { name: string } }[] };
 }
+
+export interface RepoCommitContribution {
+  repository: {
+    id: string;
+    name: string;
+    description: string | null;
+    url: string;
+    stargazerCount: number;
+    forkCount: number;
+    updatedAt: string;
+    isPrivate: boolean;
+    primaryLanguage: { name: string; color: string } | null;
+    owner: { login: string; avatarUrl: string };
+  };
+  contributions: {
+    totalCount: number;
+    nodes: {
+      occurredAt: string;
+      commitCount: number;
+      url: string;
+    }[];
+  };
+}
+
+export interface UserCommitActivity {
+  totalCommitContributions: number;
+  totalRepositoriesWithContributedCommits: number;
+  totalContributions: number;
+  contributions: ContributionDay[];
+  repoCommitContributions: RepoCommitContribution[];
+}

@@ -26,9 +26,11 @@ export async function getUserByUsername(
 
 export async function getUserRepos(
   username: string,
+  first: number = 100,
 ): Promise<GitHubUserRepoGQL[]> {
   const data = await githubGraphQL<UserReposResponse>(GET_USER_REPOS_QUERY, {
     username,
+    first,
   });
   if (!data.user) throw new NotFoundError(`User "${username}"`);
   return data.user.repositories.nodes;

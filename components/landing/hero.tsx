@@ -274,17 +274,10 @@ export function Hero({ searchInputRef }: HeroProps) {
         <span className="text-zinc-400 font-semibold">Try:</span>
         <button
           type="button"
-          onClick={() => handleChipClick("vercel")}
+          onClick={() => handleChipClick("ritesh5585")}
           className="px-3.5 py-1 rounded-full border border-indigo-500/30 bg-[#121626] hover:bg-indigo-950/40 hover:border-indigo-400 text-zinc-200 hover:text-white text-xs font-mono transition-all duration-150 cursor-pointer active:scale-95"
         >
-          vercel
-        </button>
-        <button
-          type="button"
-          onClick={() => handleChipClick("facebook/react")}
-          className="px-3.5 py-1 rounded-full border border-indigo-500/30 bg-[#121626] hover:bg-indigo-950/40 hover:border-indigo-400 text-zinc-200 hover:text-white text-xs font-mono transition-all duration-150 cursor-pointer active:scale-95"
-        >
-          facebook/react
+          Ritesh V
         </button>
         <button
           type="button"
@@ -292,6 +285,20 @@ export function Hero({ searchInputRef }: HeroProps) {
           className="px-3.5 py-1 rounded-full border border-indigo-500/30 bg-[#121626] hover:bg-indigo-950/40 hover:border-indigo-400 text-zinc-200 hover:text-white text-xs font-mono transition-all duration-150 cursor-pointer active:scale-95"
         >
           torvalds
+        </button>
+        <button
+          type="button"
+          onClick={() => handleChipClick("vercel")}
+          className="px-3.5 py-1 rounded-full border border-indigo-500/30 bg-[#121626] hover:bg-indigo-950/40 hover:border-indigo-400 text-zinc-200 hover:text-white text-xs font-mono transition-all duration-150 cursor-pointer active:scale-95"
+        >
+          vercel
+        </button>
+        <button
+          type="button"
+          onClick={() => handleChipClick("alex/what-happens-when")}
+          className="px-3.5 py-1 rounded-full border border-indigo-500/30 bg-[#121626] hover:bg-indigo-950/40 hover:border-indigo-400 text-zinc-200 hover:text-white text-xs font-mono transition-all duration-150 cursor-pointer active:scale-95"
+        >
+          Behind the Google.com
         </button>
       </div>
     </section>

@@ -73,35 +73,10 @@ export function YouTubeModal({ isOpen, onClose }: YouTubeModalProps) {
 
         {/* Email Notification Box */}
         <div className="mt-6 pt-5 border-t border-zinc-800/80">
-          {subscribed ? (
-            <div className="flex items-center gap-2 text-emerald-400 text-xs sm:text-sm bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl">
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
-              <span>You're on the early access list! We'll notify you when YouTube insights launches.</span>
-            </div>
-          ) : (
-            <form onSubmit={handleSubscribe} className="space-y-2">
-              <label className="text-xs font-medium text-zinc-300 block">
-                Get notified when this launches:
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@domain.com"
-                  className="w-full rounded-xl border border-zinc-800 bg-[#121522] px-3 py-2 text-xs sm:text-sm text-white placeholder-zinc-500 outline-none focus:border-zinc-700"
-                />
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold shrink-0 cursor-pointer transition-colors flex items-center gap-1.5"
-                >
-                  <Bell className="w-3.5 h-3.5" />
-                  Notify Me
-                </button>
-              </div>
-            </form>
-          )}
+          <div className="flex items-center gap-2 text-emerald-400 text-xs sm:text-sm bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl">
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <span>You're on the early access list! We'll notify you when YouTube insights launches.</span>
+          </div>
         </div>
       </div>
     </div>

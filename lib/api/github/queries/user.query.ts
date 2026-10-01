@@ -17,10 +17,10 @@ export const GET_USER_QUERY = `
   }
 `;
 export const GET_USER_REPOS_QUERY = `
-  query GetUserRepos($username: String!) {
+  query GetUserRepos($username: String!, $first: Int = 100) {
     user(login: $username) {
       repositories(
-        first: 20
+        first: $first
         ownerAffiliations: OWNER
         orderBy: { field: UPDATED_AT, direction: DESC }
         privacy: PUBLIC
