@@ -23,6 +23,7 @@ export interface GitHubRepoGQL {
   forkCount: number;
   watchers: { totalCount: number };
   issues: { totalCount: number };
+  pullRequests: { totalCount: number };
   primaryLanguage: { name: string; color: string } | null;
   repositoryTopics: { nodes: { topic: { name: string } }[] };
   licenseInfo: { name: string; spdxId: string } | null;

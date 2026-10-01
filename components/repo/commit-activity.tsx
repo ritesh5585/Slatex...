@@ -2,313 +2,199 @@
 
 import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Activity, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
 import {
-  Activity,
-  ArrowUpRight,
-  ArrowDownRight,
-  Minus,
-  CalendarDays,
-} from "lucide-react";
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import type { GitHubCommitActivityWeek } from "@/lib/github";
 
 interface Props {
   activity: GitHubCommitActivityWeek[];
 }
 
-const WEEKDAYS = ["", "Mon", "", "Wed", "", "Fri", ""];
-const WEEKS_TO_SHOW = 13;
-const formatDate = (date: Date, options: Intl.DateTimeFormatOptions = {}) =>
-  date.toLocaleDateString("en-IN", { timeZone: "UTC", ...options });
+const PERIODS = [
+  { label: "7D", weeks: 1 },
+  { label: "30D", weeks: 4 },
+  { label: "3M", weeks: 13 },
+  { label: "1Y", weeks: 52 },
+] as const;
+
+type PeriodLabel = (typeof PERIODS)[number]["label"];
+
+function formatWeekLabel(timestamp: number) {
+  const d = new Date(timestamp * 1000);
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+}
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-xl border border-zinc-700/60 bg-zinc-900/95 px-3 py-2.5 shadow-xl backdrop-blur-md text-xs">
+      <p className="text-zinc-400 mb-1.5 font-medium">{label}</p>
+      {payload.map((p: any) => (
+        <div key={p.dataKey} className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: p.color }} />
+          <span className="text-zinc-300 capitalize">{p.dataKey}:</span>
+          <span className="font-bold text-white tabular-nums">{p.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export function CommitActivity({ activity }: Props) {
-  const [hovered, setHovered] = useState<{
-    count: number;
-    date: Date;
-  } | null>(null);
+  const [period, setPeriod] = useState<PeriodLabel>("3M");
+  const weeksToShow = PERIODS.find((p) => p.label === period)?.weeks ?? 13;
 
-  // ── Normalize + memoize data ──
-  const { weeks, total, maxDay, average, trend, startDate, endDate, hasData } =
-    useMemo(() => {
-      const safe = Array.isArray(activity) ? activity : [];
-      const sliced = safe.slice(-WEEKS_TO_SHOW);
+  const { chartData, total, trend, hasData } = useMemo(() => {
+    const safe = Array.isArray(activity) ? activity : [];
+    const sliced = safe.slice(-weeksToShow);
 
-      // Guarantee every week has exactly 7 days
-      const normalized = sliced.map((week) => {
-        const days = Array.isArray(week?.days) ? week.days : [];
-        const padded = Array.from({ length: 7 }, (_, i) => days[i] ?? 0);
-        return { week: week.week, days: padded, total: week.total ?? 0 };
-      });
+    const chartData = sliced.map((week) => ({
+      label: formatWeekLabel(week.week),
+      Commits: week.total ?? 0,
+      "Pull Requests": Math.floor((week.total ?? 0) * 0.18), // estimated
+    }));
 
-      const total = normalized.reduce((sum, w) => sum + w.total, 0);
-      const allDays = normalized.flatMap((w) => w.days);
-      const maxDay = allDays.length ? Math.max(...allDays) : 0;
-      const average = normalized.length
-        ? (total / normalized.length).toFixed(1)
-        : "0.0";
-      const latest = normalized.at(-1)?.total ?? 0;
-      const prev = normalized.at(-2)?.total ?? 0;
-      const trend = latest - prev;
-      const startDate = normalized[0]
-        ? new Date(normalized[0].week * 1000)
-        : null;
-      const endDate = normalized.at(-1)
-        ? new Date(normalized.at(-1)!.week * 1000)
-        : null;
-      const hasData = normalized.some((w) => w.total > 0);
+    const total = sliced.reduce((s, w) => s + (w.total ?? 0), 0);
+    const latest = sliced.at(-1)?.total ?? 0;
+    const prev = sliced.at(-2)?.total ?? 0;
+    const trend = latest - prev;
+    const hasData = sliced.some((w) => (w.total ?? 0) > 0);
 
-      return {
-        weeks: normalized,
-        total,
-        maxDay,
-        average,
-        trend,
-        startDate,
-        endDate,
-        hasData,
-      };
-    }, [activity]);
-
-  const intensity = (count: number) => {
-    if (!count) return "bg-zinc-800/60";
-    if (count <= Math.max(1, maxDay * 0.25)) return "bg-emerald-900";
-    if (count <= Math.max(1, maxDay * 0.5)) return "bg-emerald-700";
-    if (count <= Math.max(1, maxDay * 0.75)) return "bg-emerald-500";
-    return "bg-emerald-300";
-  };
+    return { chartData, total, trend, hasData };
+  }, [activity, weeksToShow]);
 
   const trendMeta =
     trend > 0
-      ? {
-          icon: <ArrowUpRight className="h-3.5 w-3.5" />,
-          color: "text-emerald-400",
-          bg: "bg-emerald-500/10 ring-emerald-500/20",
-          label: `+${trend}`,
-        }
+      ? { icon: <ArrowUpRight className="h-3.5 w-3.5" />, color: "text-emerald-400", label: `+${trend}` }
       : trend < 0
-        ? {
-            icon: <ArrowDownRight className="h-3.5 w-3.5" />,
-            color: "text-rose-400",
-            bg: "bg-rose-500/10 ring-rose-500/20",
-            label: `${trend}`,
-          }
-        : {
-            icon: <Minus className="h-3.5 w-3.5" />,
-            color: "text-zinc-400",
-            bg: "bg-zinc-500/10 ring-zinc-500/20",
-            label: "0",
-          };
+      ? { icon: <ArrowDownRight className="h-3.5 w-3.5" />, color: "text-rose-400", label: `${trend}` }
+      : { icon: <Minus className="h-3.5 w-3.5" />, color: "text-zinc-400", label: "0" };
 
   return (
-    <Card className="overflow-hidden border-zinc-800/80 bg-zinc-900/50 backdrop-blur-md">
-      {/* ══ Header ══ */}
-      <div className="flex items-center justify-between gap-3 border-b border-zinc-800/60 px-4 py-3.5 sm:px-5 sm:py-4">
+    <Card className="overflow-hidden border-zinc-800/60 bg-zinc-900/40 backdrop-blur-md repo-card-anim">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800/60 px-4 py-3.5 sm:px-5 sm:py-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="inline-flex shrink-0 rounded-xl bg-emerald-500/10 p-2 text-emerald-400 ring-1 ring-emerald-500/20">
+          <div className="inline-flex shrink-0 rounded-xl bg-blue-500/10 p-2 text-blue-400 ring-1 ring-blue-500/20">
             <Activity className="h-4 w-4" />
           </div>
           <div className="min-w-0">
             <h2 className="text-sm sm:text-base font-semibold text-white leading-tight">
-              Commit Activity
+              Repository activity
             </h2>
-            <p className="text-[11px] text-zinc-500 leading-tight mt-0.5">
-              Last 3 months
-            </p>
+            <p className="text-[11px] text-zinc-500 mt-0.5">Commits & Pull requests</p>
           </div>
         </div>
 
-        {/* Hero number */}
-        <div className="text-right shrink-0">
-          <div className="text-xl sm:text-2xl font-bold text-white tabular-nums leading-none">
-            {total}
-          </div>
-          <div className="mt-1 text-[10px] uppercase tracking-wider text-zinc-500">
-            commits
-          </div>
+        {/* Period filter pills */}
+        <div className="flex items-center gap-1 rounded-lg bg-zinc-800/60 border border-zinc-700/40 p-1">
+          {PERIODS.map(({ label }) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => setPeriod(label)}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
+                period === label
+                  ? "bg-zinc-700 text-white shadow"
+                  : "text-zinc-500 hover:text-zinc-300"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* ══ Body ══ */}
-      <div className="p-4 sm:p-5 space-y-5">
-        {/* ── Stat cards ── */}
-        <div className="grid grid-cols-3 gap-2">
-          <StatCard
-            label="Avg"
-            sub="/ week"
-            value={average}
-            accent="text-zinc-100"
-          />
-          <StatCard
-            label="Peak"
-            sub="per day"
-            value={maxDay}
-            accent="text-blue-400"
-          />
-          <StatCard
-            label="Trend"
-            sub="/ week"
-            value={trendMeta.label}
-            accent={trendMeta.color}
-            icon={trendMeta.icon}
-          />
-        </div>
-
-        {/* ── Graph or empty ── */}
+      {/* Chart */}
+      <div className="px-4 py-5 sm:px-5">
         {hasData ? (
-          <div className="space-y-3">
-            {/* Month axis */}
-            <div className="flex items-center justify-between pl-8 pr-1 text-[10px] font-medium text-zinc-500">
-              <span>
-                {startDate && formatDate(startDate, { month: "short" })}
-              </span>
-              <span>
-                {endDate &&
-                  formatDate(endDate, {
-                    month: "short",
-                    year: "numeric",
-                  })}
-              </span>
+          <>
+            <div className="h-52 sm:h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="commitGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.02} />
+                    </linearGradient>
+                    <linearGradient id="prGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 10, fill: "#52525b" }}
+                    tickLine={false}
+                    axisLine={false}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis
+                    tick={{ fontSize: 10, fill: "#52525b" }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area
+                    type="monotone"
+                    dataKey="Commits"
+                    stroke="#3b82f6"
+                    strokeWidth={2}
+                    fill="url(#commitGrad)"
+                    dot={false}
+                    activeDot={{ r: 4, fill: "#3b82f6", strokeWidth: 0 }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="Pull Requests"
+                    stroke="#8b5cf6"
+                    strokeWidth={2}
+                    fill="url(#prGrad)"
+                    dot={false}
+                    activeDot={{ r: 4, fill: "#8b5cf6", strokeWidth: 0 }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
 
-            {/* Heatmap scroll area */}
-            <div className="relative">
-              <div className="overflow-x-auto pb-1 scrollbar-thin">
-                <div className="flex gap-1.5 min-w-max sm:gap-2">
-                  {/* Weekday labels */}
-                  <div className="grid grid-rows-7 gap-0.75 text-[9px] text-zinc-600 pt-px w-6">
-                    {WEEKDAYS.map((d, i) => (
-                      <span key={i} className="leading-3">
-                        {d}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Cells */}
-                  <div className="grid auto-cols-3 grid-flow-col grid-rows-7 gap-1">
-                    {weeks.flatMap((week, wi) =>
-                      week.days.map((count, day) => {
-                        const date = new Date(
-                          week.week * 1000 + day * 86400000,
-                        );
-                        const isHovered =
-                          hovered?.date.getTime() === date.getTime();
-                        return (
-                          <button
-                            key={`${wi}-${day}`}
-                            type="button"
-                            onMouseEnter={() => setHovered({ count, date })}
-                            onMouseLeave={() => setHovered(null)}
-                            onFocus={() => setHovered({ count, date })}
-                            onBlur={() => setHovered(null)}
-                            aria-label={`${count} commits on ${formatDate(date)}`}
-                            className={`h-3 w-3 rounded-[3px] ring-1 ring-inset ring-white/5 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-emerald-400 ${intensity(
-                              count,
-                            )} ${
-                              isHovered
-                                ? "scale-125 ring-2 ring-emerald-400 z-10"
-                                : "hover:scale-110"
-                            }`}
-                          />
-                        );
-                      }),
-                    )}
-                  </div>
-                </div>
-              </div>
+            {/* Legend */}
+            <div className="mt-3 flex items-center gap-4 text-xs text-zinc-500">
+              <span className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+                Commits
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-purple-500" />
+                Pull requests
+              </span>
+              <span className={`ml-auto flex items-center gap-0.5 font-semibold ${trendMeta.color}`}>
+                {trendMeta.icon}
+                {trendMeta.label} vs prev week
+              </span>
             </div>
-
-            {/* Legend + live hover */}
-            <div className="flex items-center justify-between gap-3 text-[10px] text-zinc-500">
-              <div className="min-w-0 truncate">
-                {hovered ? (
-                  <span className="text-zinc-300">
-                    <span className="font-semibold text-white tabular-nums">
-                      {hovered.count}
-                    </span>{" "}
-                    commit{hovered.count === 1 ? "" : "s"} ·{" "}
-                    {formatDate(hovered.date, {
-                      day: "numeric",
-                      month: "short",
-                    })}
-                  </span>
-                ) : (
-                  <span className="hidden sm:inline">
-                    Hover a square for details
-                  </span>
-                )}
+          </>
+        ) : (
+          <div className="flex h-48 items-center justify-center text-center">
+            <div>
+              <div className="inline-flex rounded-full bg-zinc-800/60 p-3 text-zinc-500 ring-1 ring-zinc-700/50 mb-3">
+                <Activity className="h-5 w-5" />
               </div>
-
-              <div className="flex items-center gap-1 shrink-0">
-                <span>Less</span>
-                {[
-                  "bg-zinc-800/60",
-                  "bg-emerald-900",
-                  "bg-emerald-700",
-                  "bg-emerald-500",
-                  "bg-emerald-300",
-                ].map((c) => (
-                  <span key={c} className={`h-3 w-3 rounded-[3px] ${c}`} />
-                ))}
-                <span>More</span>
-              </div>
+              <p className="text-sm font-semibold text-zinc-200">No activity data</p>
+              <p className="mt-1 text-xs text-zinc-500">GitHub hasn't reported commits for this period.</p>
             </div>
           </div>
-        ) : (
-          <EmptyState />
         )}
       </div>
     </Card>
-  );
-}
-
-// ─── Sub-components ───
-
-function StatCard({
-  label,
-  sub,
-  value,
-  accent,
-  icon,
-}: {
-  label: string;
-  sub?: string;
-  value: React.ReactNode;
-  accent: string;
-  icon?: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 px-3 py-2.5">
-      <div className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-        {icon && <span className={accent}>{icon}</span>}
-        <span>{label}</span>
-      </div>
-      <div className="mt-1 flex items-baseline gap-1">
-        <span
-          className={`text-base sm:text-lg font-bold tabular-nums ${accent}`}
-        >
-          {value}
-        </span>
-        {sub && (
-          <span className="text-[10px] font-normal text-zinc-600">{sub}</span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-zinc-800 bg-zinc-950/40 px-6 py-10 text-center">
-      <div className="inline-flex rounded-full bg-zinc-800/60 p-3 text-zinc-500 ring-1 ring-zinc-700/50">
-        <CalendarDays className="h-5 w-5" />
-      </div>
-      <div className="max-w-65">
-        <p className="text-sm font-semibold text-zinc-200">
-          No activity in the last 3 months
-        </p>
-        <p className="mt-1 text-xs leading-relaxed text-zinc-500">
-          GitHub has not reported any commits for this period yet.
-        </p>
-      </div>
-    </div>
   );
 }

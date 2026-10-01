@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AlertCircle, ArrowLeft, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BackButton } from "@/components/shared/back-button";
+import { RepoPageClient } from "@/components/repo/repo-page-client";
 import { CommitActivity } from "@/components/repo/commit-activity";
 import { CommitTimeline } from "@/components/repo/commit-timeline";
 import { ContributorsList } from "@/components/repo/contributors-list";
@@ -28,14 +28,10 @@ function parseRepoParams({ owner, repo, url }: Awaited<Props["searchParams"]>) {
   if (owner?.trim() && repo?.trim()) {
     return { owner: owner.trim(), name: repo.trim().replace(/\.git$/, "") };
   }
-
   if (!url) return { owner: "", name: "" };
-
   try {
     const parsed = new URL(url.startsWith("http") ? url : `https://${url}`);
-    const [parsedOwner = "", parsedName = ""] = parsed.pathname
-      .split("/")
-      .filter(Boolean);
+    const [parsedOwner = "", parsedName = ""] = parsed.pathname.split("/").filter(Boolean);
     return { owner: parsedOwner, name: parsedName.replace(/\.git$/, "") };
   } catch {
     return { owner: "", name: "" };
@@ -59,11 +55,9 @@ function ErrorShell({
       : "bg-red-500/10 text-red-400 ring-red-500/20";
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-950 p-4">
-      <Card className="w-full max-w-md space-y-4 border-zinc-800 bg-zinc-900/60 p-8 text-center">
-        <div
-          className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ring-1 ${colors}`}
-        >
+    <main className="flex min-h-screen items-center justify-center bg-[#08090f] p-4">
+      <Card className="w-full max-w-md space-y-4 border-zinc-800 bg-zinc-900/60 p-8 text-center backdrop-blur-md">
+        <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ring-1 ${colors}`}>
           {icon}
         </div>
         <div className="space-y-1">
@@ -71,7 +65,7 @@ function ErrorShell({
           <p className="text-sm text-zinc-400">{description}</p>
         </div>
         <Link href="/">
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2 mt-2">
             <ArrowLeft className="h-4 w-4" />
             Back to Search
           </Button>
@@ -96,7 +90,7 @@ export default async function RepoPage({ searchParams }: Props) {
 
   const headers = {
     Accept: "application/vnd.github+json",
-    "User-Agent": "DevScan-Dashboard",
+    "User-Agent": "DevLens-Dashboard",
     ...(process.env.GITHUB_TOKEN && {
       Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
     }),
@@ -117,17 +111,11 @@ export default async function RepoPage({ searchParams }: Props) {
       getRepoReadme(owner, name),
       fetch(
         `https://api.github.com/repos/${owner}/${name}/contributors?per_page=10`,
-        {
-          headers,
-          next: { revalidate: 3600 },
-        },
+        { headers, next: { revalidate: 3600 } }
       ),
       fetch(
         `https://api.github.com/repos/${owner}/${name}/stats/commit_activity`,
-        {
-          headers,
-          next: { revalidate: 1800 },
-        },
+        { headers, next: { revalidate: 1800 } }
       ),
     ]);
 
@@ -135,49 +123,108 @@ export default async function RepoPage({ searchParams }: Props) {
       contributorsResponse.ok ? contributorsResponse.json() : [],
       activityResponse.ok ? activityResponse.json() : [],
     ]);
-    const contributors: GitHubContributor[] = Array.isArray(contributorData)
-      ? contributorData
-      : [];
-    const activity: GitHubCommitActivityWeek[] = Array.isArray(activityData)
-      ? activityData.slice(-13)
-      : [];
+
+    const contributors: GitHubContributor[] = Array.isArray(contributorData) ? contributorData : [];
+    const activity: GitHubCommitActivityWeek[] = Array.isArray(activityData) ? activityData.slice(-13) : [];
     const languages = Object.fromEntries(
-      languageEdges.map(({ node, size }) => [node.name, size]),
+      languageEdges.map(({ node, size }) => [node.name, size])
     );
 
     return (
-      <main className="min-h-screen bg-zinc-950 pb-24 text-zinc-100 antialiased selection:bg-blue-500/30 selection:text-blue-200">
-        <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-xl">
-          <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
-            <BackButton />
-            <span className="hidden font-mono text-xs text-zinc-500 sm:inline-flex">
-              github.com/{owner}/{name}
-            </span>
-          </div>
-        </header>
+      <RepoPageClient
+        owner={owner}
+        repoName={name}
+        repoUrl={repo.url}
+        homepage={repo.homepageUrl}
+        description={repo.description}
+        license={repo.licenseInfo?.spdxId ?? null}
+        createdAt={repo.createdAt}
+        pushedAt={repo.pushedAt}
+        defaultBranch={repo.defaultBranchRef?.name ?? null}
+      >
+        <div className="px-4 sm:px-6 py-6 space-y-5 max-w-5xl mx-auto">
 
-        <div className="mx-auto max-w-5xl space-y-8 px-4 pt-8 sm:px-6 lg:px-8">
-          <RepoHeader repo={repo} />
-          <RepoStats repo={repo} />
-          <CommitActivity activity={activity} />
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <LanguagePie languages={languages} />
-            <div className="lg:col-span-2">
-              <ContributorsList contributors={contributors} />
+          {/* ── Overview ─────────────────────────────────────────────────── */}
+          <section id="repo-section-overview" className="space-y-5 scroll-mt-20">
+            <RepoHeader repo={repo} />
+            <RepoStats
+              repo={repo}
+              contributorCount={contributors.length}
+              pullRequestCount={repo.pullRequests?.totalCount}
+            />
+          </section>
+
+          {/* ── Activity ─────────────────────────────────────────────────── */}
+          <section id="repo-section-activity" className="scroll-mt-20">
+            <CommitActivity activity={activity} />
+          </section>
+
+          {/* ── Commits ──────────────────────────────────────────────────── */}
+          <section id="repo-section-commits" className="scroll-mt-20">
+            <CommitTimeline commits={commits} owner={owner} repoName={name} />
+          </section>
+
+          {/* ── People ───────────────────────────────────────────────────── */}
+          <section id="repo-section-people" className="scroll-mt-20">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+              <div className="lg:col-span-3">
+                <ContributorsList contributors={contributors} />
+              </div>
+              <div className="lg:col-span-2">
+                <LanguagePie languages={languages} />
+              </div>
             </div>
-          </div>
-          <CommitTimeline commits={commits} owner={owner} repoName={name} />
-          <ReadmeViewer
-            content={readme ?? ""}
-            owner={owner}
-            repoName={name}
-            branch={repo.defaultBranchRef?.name}
-          />
-          <footer className="border-t border-zinc-900/80 pt-12 text-center text-xs text-zinc-600">
-            Repository dashboard generated from public GitHub data.
+          </section>
+
+          {/* ── Releases placeholder ─────────────────────────────────────── */}
+          <section id="repo-section-releases" className="scroll-mt-20">
+            <Card className="p-5 border-zinc-800/60 bg-zinc-900/40 backdrop-blur-md repo-card-anim">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-semibold text-white">Releases</h2>
+                <a
+                  href={`${repo.url}/releases`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                >
+                  View all
+                </a>
+              </div>
+              <a
+                href={`${repo.url}/releases`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-3 p-3 rounded-xl border border-zinc-800/60 hover:bg-zinc-800/30 transition-colors group"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 ring-1 ring-indigo-500/20">
+                  <span className="text-indigo-400 text-lg">🏷</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-zinc-200 group-hover:text-white transition-colors">
+                    View all releases on GitHub
+                  </p>
+                  <p className="text-xs text-zinc-500">{owner}/{name}</p>
+                </div>
+              </a>
+            </Card>
+          </section>
+
+          {/* ── README ───────────────────────────────────────────────────── */}
+          <section id="repo-section-readme" className="scroll-mt-20 pb-8">
+            <ReadmeViewer
+              content={readme ?? ""}
+              owner={owner}
+              repoName={name}
+              branch={repo.defaultBranchRef?.name}
+            />
+          </section>
+
+          {/* Footer */}
+          <footer className="pb-6 text-center text-xs text-zinc-700">
+            Repository dashboard generated from public GitHub data · DevLens
           </footer>
         </div>
-      </main>
+      </RepoPageClient>
     );
   } catch (error) {
     if (error instanceof NotFoundError) {

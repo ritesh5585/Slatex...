@@ -10,6 +10,7 @@ export const GET_REPO_QUERY = `
       forkCount
       watchers { totalCount }
       issues(states: OPEN) { totalCount }
+      pullRequests(states: OPEN) { totalCount }
       primaryLanguage { name color }
       repositoryTopics(first: 10) { nodes { topic { name } } }
       licenseInfo { name spdxId }
