@@ -89,11 +89,11 @@ export function CommitRepoCards({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredRepos.map((item, idx) => {
           const repo = item.repository;
-          const totalCommitsInRepo = item.contributions.totalCount || 
+          const totalCommitsInRepo = item.contributions.totalCount ||
             item.contributions.nodes.reduce((s, n) => s + (n.commitCount || 1), 0);
           const langColor = getLanguageColor(repo.primaryLanguage?.name || null);
           const latestCommit = item.contributions.nodes[0];
-          
+
           let latestDateLabel = "Recent";
           if (latestCommit?.occurredAt) {
             const date = new Date(latestCommit.occurredAt);
@@ -170,7 +170,7 @@ export function CommitRepoCards({
                     <Star className="h-3 w-3 text-amber-400/80 fill-amber-400/20" />
                     <span>{repo.stargazerCount.toLocaleString()}</span>
                   </span>
-                  
+
                   <Link
                     href={`/repo?owner=${repo.owner.login}&repo=${repo.name}`}
                     className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 font-medium transition-colors"

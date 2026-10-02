@@ -28,7 +28,7 @@ function ErrorPage({ icon: Icon, iconClass, title, description }: {
 }) {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-4">
-      
+
       <Card className="max-w-md w-full p-8 text-center border-zinc-800 bg-zinc-900/60 backdrop-blur-xl space-y-4">
         <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ring-1 ${iconClass}`}>
           <Icon className="h-7 w-7" />
@@ -304,7 +304,7 @@ export default async function ResultPage({ searchParams }: Props) {
             </div>
 
             {/* ── Recent Commits ─────────────────────────────────────────── */}
-            <Card className="p-5 border-zinc-800/60 bg-zinc-900/40 backdrop-blur-md">
+            <Card className="p-5 border-zinc-800/60 bg-zinc-900/40 background-blur-md">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-semibold text-white">Recent commits</h2>
                 <a href={user.url} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">

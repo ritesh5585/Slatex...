@@ -133,11 +133,10 @@ export function RepoListView({
           <button
             type="button"
             onClick={() => setSelectedLanguage("all")}
-            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
-              selectedLanguage === "all"
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${selectedLanguage === "all"
                 ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/30 font-semibold"
                 : "bg-zinc-800/60 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 border border-zinc-700/40"
-            }`}
+              }`}
           >
             All ({repos.length})
           </button>
@@ -151,11 +150,10 @@ export function RepoListView({
                 key={name}
                 type="button"
                 onClick={() => setSelectedLanguage(isSelected ? "all" : name)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
-                  isSelected
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${isSelected
                     ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/30 font-semibold ring-1 ring-indigo-400/40"
                     : "bg-zinc-800/60 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 border border-zinc-700/40"
-                }`}
+                  }`}
               >
                 <span
                   className="w-2 h-2 rounded-full shrink-0"

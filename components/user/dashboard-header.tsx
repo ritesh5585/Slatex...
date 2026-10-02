@@ -124,11 +124,10 @@ export function DashboardHeader({
             <Link
               key={id}
               href={href}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-                isActive
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${isActive
                   ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/30"
                   : "text-zinc-400 bg-zinc-900/80 hover:text-zinc-200 hover:bg-zinc-800 border border-zinc-800/60"
-              }`}
+                }`}
             >
               <Icon className="h-3 w-3" />
               <span>{label}</span>

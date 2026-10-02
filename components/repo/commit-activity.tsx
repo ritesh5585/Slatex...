@@ -76,8 +76,8 @@ export function CommitActivity({ activity }: Props) {
     trend > 0
       ? { icon: <ArrowUpRight className="h-3.5 w-3.5" />, color: "text-emerald-400", label: `+${trend}` }
       : trend < 0
-      ? { icon: <ArrowDownRight className="h-3.5 w-3.5" />, color: "text-rose-400", label: `${trend}` }
-      : { icon: <Minus className="h-3.5 w-3.5" />, color: "text-zinc-400", label: "0" };
+        ? { icon: <ArrowDownRight className="h-3.5 w-3.5" />, color: "text-rose-400", label: `${trend}` }
+        : { icon: <Minus className="h-3.5 w-3.5" />, color: "text-zinc-400", label: "0" };
 
   return (
     <Card className="overflow-hidden border-zinc-800/60 bg-zinc-900/40 backdrop-blur-md repo-card-anim">
@@ -102,11 +102,10 @@ export function CommitActivity({ activity }: Props) {
               key={label}
               type="button"
               onClick={() => setPeriod(label)}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
-                period === label
+              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${period === label
                   ? "bg-zinc-700 text-white shadow"
                   : "text-zinc-500 hover:text-zinc-300"
-              }`}
+                }`}
             >
               {label}
             </button>

@@ -58,9 +58,8 @@ export function RepoStats({ repo, contributorCount = 0, pullRequestCount = 0 }: 
         {stats.map(({ label, value, icon: Icon, color, iconBg }, idx) => (
           <div
             key={label}
-            className={`flex flex-col gap-1 p-5 sm:p-6 group hover:bg-zinc-800/20 transition-colors ${
-              idx >= 2 && idx < 4 ? "sm:border-t-0 border-t border-zinc-800/60" : ""
-            } ${idx === 4 ? "col-span-2 sm:col-span-1" : ""}`}
+            className={`flex flex-col gap-1 p-5 sm:p-6 group hover:bg-zinc-800/20 transition-colors ${idx >= 2 && idx < 4 ? "sm:border-t-0 border-t border-zinc-800/60" : ""
+              } ${idx === 4 ? "col-span-2 sm:col-span-1" : ""}`}
           >
             <div className={`flex h-8 w-8 items-center justify-center rounded-lg ring-1 ${iconBg} mb-1`}>
               <Icon className={`h-4 w-4 ${color}`} />

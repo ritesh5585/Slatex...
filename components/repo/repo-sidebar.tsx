@@ -87,18 +87,16 @@ export function RepoSidebar({
               key={id}
               type="button"
               onClick={() => onSectionChange?.(id)}
-              className={`group w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer text-left ${
-                isActive
+              className={`group w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer text-left ${isActive
                   ? "bg-indigo-600 text-white shadow-md shadow-indigo-700/25 ring-1 ring-indigo-400/30"
                   : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60"
-              }`}
+                }`}
             >
               <Icon
-                className={`h-4 w-4 shrink-0 transition-colors ${
-                  isActive
+                className={`h-4 w-4 shrink-0 transition-colors ${isActive
                     ? "text-white"
                     : "text-zinc-500 group-hover:text-zinc-300"
-                }`}
+                  }`}
               />
               <span className="flex-1 text-left truncate">{label}</span>
             </button>

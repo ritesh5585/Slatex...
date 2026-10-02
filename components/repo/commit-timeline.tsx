@@ -1,4 +1,4 @@
-import { GitCommit, ExternalLink, ArrowRight } from "lucide-react";
+import { GitCommit, ArrowRight, ExternalLink } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import type { CommitNode } from "@/lib/api/github";
 
@@ -24,48 +24,45 @@ function getCommitType(msg: string) {
   return match ? match[1] : null;
 }
 
-const TYPE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  feat: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20" },
-  fix: { bg: "bg-rose-500/10", text: "text-rose-400", border: "border-rose-500/20" },
-  chore: { bg: "bg-zinc-500/10", text: "text-zinc-400", border: "border-zinc-500/20" },
-  docs: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20" },
-  refactor: { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20" },
-  test: { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/20" },
-  style: { bg: "bg-pink-500/10", text: "text-pink-400", border: "border-pink-500/20" },
-  perf: { bg: "bg-cyan-500/10", text: "text-cyan-400", border: "border-cyan-500/20" },
+const TYPE_COLORS: Record<string, { bg: string; text?: string }> = {
+  feat: { bg: "bg-blue-950/40 text-blue-400 border border-blue-900/40" },
+  fix: { bg: "bg-rose-950/40 text-rose-400 border border-rose-900/40" },
+  chore: { bg: "bg-zinc-800 text-zinc-400 border border-zinc-700/50" },
+  docs: { bg: "bg-emerald-950/40 text-emerald-400 border border-emerald-900/40" },
+  refactor: { bg: "bg-purple-950/40 text-purple-400 border border-purple-900/40" },
+  test: { bg: "bg-amber-950/40 text-amber-400 border border-amber-900/40" },
+  style: { bg: "bg-pink-950/40 text-pink-400 border border-pink-900/40" },
+  perf: { bg: "bg-cyan-950/40 text-cyan-400 border border-cyan-900/40" },
 };
 
-const DEFAULT_TYPE = { bg: "bg-zinc-500/10", text: "text-zinc-400", border: "border-zinc-500/20" };
+const DEFAULT_TYPE: { bg: string; text?: string } = { bg: "bg-zinc-800 text-zinc-400 border border-zinc-700/50" };
 
 export function CommitTimeline({ commits, owner, repoName }: Props) {
   if (!commits?.length) return null;
 
   return (
-    <Card className="overflow-hidden border-zinc-800/60 bg-zinc-900/40 backdrop-blur-md repo-card-anim">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800/60">
-        <div className="flex items-center gap-2.5">
-          <div className="inline-flex rounded-xl bg-blue-500/10 p-2 text-blue-400 ring-1 ring-blue-500/20">
-            <GitCommit className="h-4 w-4" />
-          </div>
+    <Card className="overflow-hidden border border-[var(--border)] bg-[var(--surface)]">
+      <div className="flex items-center justify-between px-4 py-3 sm:px-5 border-b border-[var(--border)]">
+        <div className="flex items-center gap-2">
+          <GitCommit className="h-4 w-4 text-[var(--accent)]" />
           <div>
-            <h2 className="text-base font-semibold text-white">Recent Commits</h2>
-            <p className="text-[11px] text-zinc-500">{commits.length} most recent</p>
+            <h2 className="text-sm sm:text-base font-semibold text-white">Recent Commits</h2>
+            <p className="text-[11px] text-[var(--text-tertiary)]">{commits.length} recent entries</p>
           </div>
         </div>
         <a
           href={`https://github.com/${owner}/${repoName}/commits`}
           target="_blank"
           rel="noreferrer"
-          className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
+          className="text-xs text-[var(--accent)] hover:underline flex items-center gap-1"
         >
           View all <ArrowRight className="h-3 w-3" />
         </a>
       </div>
 
-      <div className="p-5">
+      <div className="p-4 sm:p-5">
         <div className="relative space-y-0">
-          {/* Timeline vertical line */}
-          <div className="absolute left-[18px] top-3 bottom-3 w-px bg-gradient-to-b from-blue-500/40 via-zinc-800 to-transparent" />
+          <div className="absolute left-[13px] top-3 bottom-3 w-px bg-[var(--border-subtle)]" />
 
           {commits.slice(0, 8).map((commit) => {
             const msg = commit.message.split("\n")[0];
@@ -82,37 +79,37 @@ export function CommitTimeline({ commits, owner, repoName }: Props) {
                 href={`https://github.com/${owner}/${repoName}/commit/${commit.oid}`}
                 target="_blank"
                 rel="noreferrer"
-                className="relative flex items-start gap-4 rounded-xl py-3 pr-2 pl-1 hover:bg-zinc-800/30 transition-colors group"
+                className="relative flex items-start gap-3 rounded-[6px] py-2 px-1 hover:bg-[var(--surface-canvas)] transition-colors group"
               >
                 {/* Timeline dot */}
-                <div className="relative z-10 mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-zinc-900 ring-1 ring-zinc-700 group-hover:ring-blue-500/50 transition-all">
-                  <div className="h-2 w-2 rounded-full bg-blue-500 group-hover:bg-blue-400 transition-colors" />
+                <div className="relative z-10 mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--surface-sunken)] border border-[var(--border-strong)]">
+                  <div className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start gap-2 flex-wrap mb-1">
+                  <div className="flex items-start gap-1.5 flex-wrap mb-0.5">
                     {type && typeStyle && (
                       <span
-                        className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border uppercase tracking-wider shrink-0 ${typeStyle.bg} ${typeStyle.text} ${typeStyle.border}`}
+                        className={`text-[10px] font-medium px-1.5 py-0.2 rounded-[4px] uppercase tracking-wider shrink-0 ${typeStyle.bg}`}
                       >
                         {type}
                       </span>
                     )}
-                    <p className="text-sm text-zinc-200 line-clamp-1 font-medium leading-snug group-hover:text-white transition-colors">
+                    <p className="text-xs text-[var(--text-primary)] line-clamp-1 font-medium leading-snug group-hover:text-white transition-colors">
                       {type ? msg.replace(/^[\w-]+(\(.+\))?:\s*/, "") : msg}
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                    <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-zinc-700/40">
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--text-tertiary)]">
+                    <span className="font-mono text-[10px] px-1 py-0.2 rounded-[4px] bg-[var(--surface-canvas)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">
                       {shortOid}
                     </span>
-                    <span className="text-zinc-400">{author}</span>
+                    <span className="text-[var(--text-secondary)]">{author}</span>
                     <span>·</span>
                     <span>{timeAgo(commit.committedDate)}</span>
                   </div>
                 </div>
 
-                <ExternalLink className="h-3.5 w-3.5 text-zinc-600 shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ExternalLink className="h-3.5 w-3.5 text-[var(--text-tertiary)] shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" />
               </a>
             );
           })}

@@ -9,7 +9,7 @@ interface NavbarProps {
 export function Navbar({ onGetStarted }: NavbarProps) {
   return (
     <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2 flex items-center justify-end">
-      
+
       <button
         type="button"
         onClick={onGetStarted}
