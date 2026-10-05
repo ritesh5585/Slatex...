@@ -242,7 +242,7 @@ export function Hero({ searchInputRef }: HeroProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Enter a GitHub username or repository URL"
-              className="w-full bg-transparent py-2.5 text-sm sm:text-base text-white placeholder-zinc-400 outline-none font-medium"
+              className="landing-search-input w-full bg-transparent py-2.5 text-sm sm:text-base text-white placeholder-zinc-400 outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-transparent focus-visible:outline-none font-medium "
               disabled={isLoading}
             />
           </div>
