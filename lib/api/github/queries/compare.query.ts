@@ -1,4 +1,4 @@
- export const COMPARE_QUERY = `
+export const COMPARE_QUERY = `
   query CompareUsers($u1: String!, $u2: String!) {
     user1: user(login: $u1) {
       login
@@ -13,7 +13,6 @@
       following { totalCount }
       repositories(privacy: PUBLIC, ownerAffiliations: OWNER) { totalCount }
       contributionsCollection {
-        totalContributions
         totalCommitContributions
         contributionCalendar {
           totalContributions
@@ -66,7 +65,6 @@
       following { totalCount }
       repositories(privacy: PUBLIC, ownerAffiliations: OWNER) { totalCount }
       contributionsCollection {
-        totalContributions
         totalCommitContributions
         contributionCalendar {
           totalContributions

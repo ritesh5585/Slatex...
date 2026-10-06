@@ -4,7 +4,7 @@ Paste in a GitHub username or repo and get a dashboard back — commit activity,
 
 Live: https://slatex-seven.vercel.app
 
-Try `torvalds`, `vercel/next.js`, or just paste a full GitHub URL.
+Try `Gautam S`, `vercel/next.js`, or just paste a full GitHub URL.
 
 ## What it does
 
@@ -45,10 +45,10 @@ Read-only scope is fine. Generate one at github.com/settings/tokens.
 
 One search box handles four different shapes of input:
 
-- `torvalds` → username
+- `Gautam` → username
 - `vercel/next.js` → owner/repo
 - `https://github.com/facebook/react` → full repo URL
-- `https://github.com/torvalds` → full profile URL
+- `https://github.com/callmegautam` → full profile URL
 
 It strips protocol, query params, and trailing slashes, then figures out whether it's looking at one segment (user) or two (repo) and routes accordingly. All of that logic lives in `lib/parse-input.ts` — everything downstream just gets a clean `{ type, owner, repo? }` shape to work with.
 

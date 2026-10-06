@@ -125,7 +125,7 @@ export function CompareModal({ isOpen, onClose }: CompareModalProps) {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && clean1 && clean2) handleCompareNow();
                 }}
-                placeholder="e.g. priya-dev"
+                placeholder="e.g ateeksh soni"
                 className="w-full rounded-xl border border-zinc-800 bg-[#121522] px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/50 transition-colors"
               />
             </div>
@@ -137,18 +137,18 @@ export function CompareModal({ isOpen, onClose }: CompareModalProps) {
           <span>Presets:</span>
           <button
             type="button"
-            onClick={() => handlePreset("ritesh5585", "priya-dev")}
+            onClick={() => handlePreset("ritesh5585", "ateekshsoni")}
             className="text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
           >
-            ritesh5585 vs priya-dev
+            ritesh5585 vs ateekshsoni
           </button>
           <span>•</span>
           <button
             type="button"
-            onClick={() => handlePreset("shadcn", "leerob")}
+            onClick={() => handlePreset("callmegautam", "ankurdotio")}
             className="text-zinc-400 hover:text-white underline cursor-pointer"
           >
-            shadcn vs leerob
+            Gautam Sutar vs Ankur Prajapati
           </button>
           <span>•</span>
           <button

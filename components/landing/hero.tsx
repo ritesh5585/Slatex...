@@ -281,10 +281,17 @@ export function Hero({ searchInputRef }: HeroProps) {
         </button>
         <button
           type="button"
-          onClick={() => handleChipClick("torvalds")}
+          onClick={() => handleChipClick("callmegautam")}
           className="px-3.5 py-1 rounded-full border border-indigo-500/30 bg-[#121626] hover:bg-indigo-950/40 hover:border-indigo-400 text-zinc-200 hover:text-white text-xs font-mono transition-all duration-150 cursor-pointer active:scale-95"
         >
-          torvalds
+          Gautam S
+        </button>
+        <button
+          type="button"
+          onClick={() => handleChipClick("ankurdotio")}
+          className="px-3.5 py-1 rounded-full border border-indigo-500/30 bg-[#121626] hover:bg-indigo-950/40 hover:border-indigo-400 text-zinc-200 hover:text-white text-xs font-mono transition-all duration-150 cursor-pointer active:scale-95"
+        >
+          Ankur P
         </button>
         <button
           type="button"
