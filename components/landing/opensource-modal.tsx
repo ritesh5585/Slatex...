@@ -58,7 +58,7 @@ export function OpenSourceModal({ isOpen, onClose }: OpenSourceModalProps) {
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/github/user/${encodeURIComponent(clean)}`);
+      const res = await fetch(`/api/github/user/${encodeURIComponent(clean)}`); 
       if (res.ok) {
         const data = await res.json();
         setUserProfile(data);

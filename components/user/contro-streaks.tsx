@@ -5,10 +5,11 @@ import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
-interface ContributionDay {
+type ContributionDay = {
   date: string;
-  count: number;
-}
+  count?: number;
+  contributionCount?: number;
+};
 
 interface Props {
   contributions: ContributionDay[];
@@ -25,9 +26,14 @@ interface StreakStats {
   longestEnd: Date | null;
   firstDate: Date | null;
   lastDate: Date | null;
+  activeDays: number;
 }
 
-function computeStreaks(days: ContributionDay[]): StreakStats {
+function getContributionCount(day: ContributionDay): number {
+  return Number(day.count ?? day.contributionCount ?? 0);
+}
+
+export function computeStreaks(days: ContributionDay[]): StreakStats {
   const empty: StreakStats = {
     total: 0,
     current: 0,
@@ -38,18 +44,24 @@ function computeStreaks(days: ContributionDay[]): StreakStats {
     longestEnd: null,
     firstDate: null,
     lastDate: null,
+    activeDays: 0,
   };
 
   if (!days?.length) return empty;
 
   const sorted = [...days]
-    .map((e) => ({ ...e, dateObj: new Date(e.date) }))
+    .map((e) => ({
+      ...e,
+      dateObj: new Date(e.date),
+      count: getContributionCount(e),
+    }))
     .filter((e) => !isNaN(e.dateObj.getTime()))
     .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
 
   if (!sorted.length) return empty;
 
   const total = sorted.reduce((sum, e) => sum + (e.count || 0), 0);
+  const activeDays = sorted.filter((e) => e.count > 0).length;
 
   let longest = 0;
   let longestStart: Date | null = null;
@@ -119,6 +131,7 @@ function computeStreaks(days: ContributionDay[]): StreakStats {
     longestEnd,
     firstDate: sorted[0].dateObj,
     lastDate: sorted[sorted.length - 1].dateObj,
+    activeDays,
   };
 }
 

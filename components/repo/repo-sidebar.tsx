@@ -69,7 +69,7 @@ export function RepoSidebar({
         className="flex items-center gap-2.5 px-3 mb-7 group cursor-pointer transition-opacity hover:opacity-90"
       >
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 shadow-lg shadow-indigo-500/30 font-bold text-white text-sm shrink-0 group-hover:scale-105 transition-transform">
-          D
+          S
         </div>
         <div className="flex flex-col">
           <span className="text-[15px] font-bold text-white tracking-tight leading-none">

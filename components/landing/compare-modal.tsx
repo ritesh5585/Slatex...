@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { X, ArrowRight, GitCompare, Sparkles, Loader2, User } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface CompareModalProps {
   isOpen: boolean;
@@ -10,36 +11,48 @@ interface CompareModalProps {
 }
 
 export function CompareModal({ isOpen, onClose }: CompareModalProps) {
+  const router = useRouter();
   const [dev1, setDev1] = useState("");
   const [dev2, setDev2] = useState("");
   const [loading, setLoading] = useState(false);
   const [comparisonData, setComparisonData] = useState<{
     user1: any;
     user2: any;
+    verdict?: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleCompare = async () => {
-    if (!dev1.trim() || !dev2.trim()) return;
+  const clean1 = dev1.trim().replace(/^@/, "");
+  const clean2 = dev2.trim().replace(/^@/, "");
+
+  // Direct navigation to the new compare page
+  const handleCompareNow = () => {
+    if (!clean1 || !clean2) return;
+    onClose();
+    router.push(`/compare?user1=${encodeURIComponent(clean1)}&user2=${encodeURIComponent(clean2)}`);
+  };
+
+  // Preview using GraphQL API route
+  const handleFetchPreview = async () => {
+    if (!clean1 || !clean2) return;
     setLoading(true);
     setError(null);
 
     try {
-      const [res1, res2] = await Promise.all([
-        fetch(`/api/github/user/${encodeURIComponent(dev1.trim().replace(/^@/, ""))}`),
-        fetch(`/api/github/user/${encodeURIComponent(dev2.trim().replace(/^@/, ""))}`),
-      ]);
+      const res = await fetch(
+        `/api/github/compare?user1=${encodeURIComponent(clean1)}&user2=${encodeURIComponent(clean2)}`,
+      );
+      const json = await res.json();
 
-      if (!res1.ok || !res2.ok) {
-        throw new Error("One or both GitHub profiles could not be found.");
+      if (!res.ok) {
+        throw new Error(json.error || "Failed to compare users with GraphQL API");
       }
 
-      const [data1, data2] = await Promise.all([res1.json(), res2.json()]);
-      setComparisonData({ user1: data1, user2: data2 });
+      setComparisonData(json);
     } catch (err: any) {
-      setError(err?.message || "Failed to compare users");
+      setError(err?.message || "Failed to compare users via GraphQL");
     } finally {
       setLoading(false);
     }
@@ -48,16 +61,17 @@ export function CompareModal({ isOpen, onClose }: CompareModalProps) {
   const handlePreset = (u1: string, u2: string) => {
     setDev1(u1);
     setDev2(u2);
+    setError(null);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div className="relative w-full max-w-2xl rounded-2xl border border-zinc-800 bg-[#0d0f17] p-6 sm:p-8 shadow-2xl text-left overflow-y-auto max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-2xl rounded-2xl border border-zinc-800 bg-[#0d0f17] p-6 sm:p-8 shadow-2xl text-left overflow-y-auto max-h-[90vh] ring-1 ring-white/10">
         {/* Close Button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-5 right-5 text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors"
+          className="absolute top-5 right-5 text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -71,7 +85,7 @@ export function CompareModal({ isOpen, onClose }: CompareModalProps) {
             <h3 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
               Compare developers
               <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 font-medium">
-                Beta
+                GraphQL Powered
               </span>
             </h3>
             <p className="text-xs sm:text-sm text-zinc-400">
@@ -91,8 +105,11 @@ export function CompareModal({ isOpen, onClose }: CompareModalProps) {
                 type="text"
                 value={dev1}
                 onChange={(e) => setDev1(e.target.value)}
-                placeholder="e.g. shadcn"
-                className="w-full rounded-xl border border-zinc-800 bg-[#121522] px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 outline-none focus:border-purple-500/60 transition-colors"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && clean1 && clean2) handleCompareNow();
+                }}
+                placeholder="e.g. ritesh5585"
+                className="w-full rounded-xl border border-zinc-800 bg-[#121522] px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/50 transition-colors"
               />
             </div>
           </div>
@@ -105,16 +122,27 @@ export function CompareModal({ isOpen, onClose }: CompareModalProps) {
                 type="text"
                 value={dev2}
                 onChange={(e) => setDev2(e.target.value)}
-                placeholder="e.g. leerob"
-                className="w-full rounded-xl border border-zinc-800 bg-[#121522] px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 outline-none focus:border-purple-500/60 transition-colors"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && clean1 && clean2) handleCompareNow();
+                }}
+                placeholder="e.g. priya-dev"
+                className="w-full rounded-xl border border-zinc-800 bg-[#121522] px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/50 transition-colors"
               />
             </div>
           </div>
         </div>
 
         {/* Quick Presets */}
-        <div className="flex items-center gap-2 mt-3 text-xs text-zinc-500">
+        <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-zinc-500">
           <span>Presets:</span>
+          <button
+            type="button"
+            onClick={() => handlePreset("ritesh5585", "priya-dev")}
+            className="text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
+          >
+            ritesh5585 vs priya-dev
+          </button>
+          <span>•</span>
           <button
             type="button"
             onClick={() => handlePreset("shadcn", "leerob")}
@@ -132,25 +160,36 @@ export function CompareModal({ isOpen, onClose }: CompareModalProps) {
           </button>
         </div>
 
-        {/* Action Button */}
-        <div className="mt-5 flex justify-end">
+        {/* Action Buttons */}
+        <div className="mt-6 flex flex-wrap items-center justify-end gap-3 pt-3 border-t border-zinc-800/80">
           <button
             type="button"
-            onClick={handleCompare}
-            disabled={loading || !dev1.trim() || !dev2.trim()}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-sm font-semibold transition-all cursor-pointer shadow-lg shadow-purple-600/20 active:scale-95"
+            onClick={handleFetchPreview}
+            disabled={loading || !clean1 || !clean2}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-700 bg-zinc-800/60 hover:bg-zinc-800 hover:text-white disabled:opacity-50 text-zinc-300 text-sm font-medium transition-all cursor-pointer"
           >
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Comparing...
+                Querying GraphQL...
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4" />
-                Compare Side-by-Side
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                Quick Preview
               </>
             )}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleCompareNow}
+            disabled={!clean1 || !clean2}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white text-sm font-semibold transition-all cursor-pointer shadow-lg shadow-indigo-600/30 active:scale-95"
+          >
+            <GitCompare className="w-4 h-4" />
+            Compare Now
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
 
@@ -161,85 +200,101 @@ export function CompareModal({ isOpen, onClose }: CompareModalProps) {
           </div>
         )}
 
-        {/* Comparison Result */}
+        {/* Comparison Data Preview */}
         {comparisonData && (
-          <div className="mt-6 pt-6 border-t border-zinc-800/80 grid grid-cols-2 gap-4">
-            {/* Dev 1 Card */}
-            <div className="rounded-xl border border-zinc-800 bg-[#121522] p-4 text-center">
-              <div className="w-12 h-12 rounded-full overflow-hidden mx-auto bg-zinc-800 mb-2">
-                {comparisonData.user1.avatar_url ? (
-                  <img
-                    src={comparisonData.user1.avatar_url}
-                    alt={comparisonData.user1.login}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <User className="w-6 h-6 m-3 text-zinc-500" />
-                )}
-              </div>
-              <h4 className="font-bold text-white text-base">
-                {comparisonData.user1.name || comparisonData.user1.login}
-              </h4>
-              <p className="text-xs text-zinc-400">@{comparisonData.user1.login}</p>
-              <div className="mt-4 grid grid-cols-2 gap-2 text-left text-xs">
-                <div className="p-2 rounded bg-zinc-900/60 border border-zinc-800/60">
-                  <div className="text-zinc-500">Followers</div>
-                  <div className="font-bold text-white text-sm">
-                    {comparisonData.user1.followers?.toLocaleString() || 0}
+          <div className="mt-6 pt-5 border-t border-zinc-800/80 space-y-4">
+            {comparisonData.verdict && (
+              <p className="text-xs text-indigo-300 bg-indigo-950/40 border border-indigo-800/50 p-2.5 rounded-xl text-center">
+                {comparisonData.verdict}
+              </p>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Dev 1 Card */}
+              <div className="rounded-xl border border-indigo-900/40 bg-[#121522] p-4 text-center ring-1 ring-indigo-500/20">
+                <div className="w-12 h-12 rounded-full overflow-hidden mx-auto bg-zinc-800 mb-2 ring-2 ring-indigo-500/40">
+                  {comparisonData.user1.avatarUrl ? (
+                    <img
+                      src={comparisonData.user1.avatarUrl}
+                      alt={comparisonData.user1.login}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-6 h-6 m-3 text-zinc-500" />
+                  )}
+                </div>
+                <h4 className="font-bold text-white text-base">
+                  {comparisonData.user1.name || comparisonData.user1.login}
+                </h4>
+                <p className="text-xs text-indigo-400">@{comparisonData.user1.login}</p>
+                <div className="mt-3 grid grid-cols-2 gap-2 text-left text-xs">
+                  <div className="p-2 rounded bg-zinc-900/60 border border-zinc-800/60">
+                    <div className="text-zinc-500 text-[11px]">Followers</div>
+                    <div className="font-bold text-white text-sm">
+                      {typeof comparisonData.user1.followers === "number"
+                        ? comparisonData.user1.followers.toLocaleString()
+                        : comparisonData.user1.followers?.totalCount?.toLocaleString?.() || 0}
+                    </div>
+                  </div>
+                  <div className="p-2 rounded bg-zinc-900/60 border border-zinc-800/60">
+                    <div className="text-zinc-500 text-[11px]">Public Repos</div>
+                    <div className="font-bold text-white text-sm">
+                      {typeof comparisonData.user1.publicRepos === "number"
+                        ? comparisonData.user1.publicRepos.toLocaleString()
+                        : comparisonData.user1.publicRepos?.totalCount?.toLocaleString?.() || 0}
+                    </div>
                   </div>
                 </div>
-                <div className="p-2 rounded bg-zinc-900/60 border border-zinc-800/60">
-                  <div className="text-zinc-500">Public Repos</div>
-                  <div className="font-bold text-white text-sm">
-                    {comparisonData.user1.public_repos?.toLocaleString() || 0}
+              </div>
+
+              {/* Dev 2 Card */}
+              <div className="rounded-xl border border-amber-900/40 bg-[#121522] p-4 text-center ring-1 ring-amber-500/20">
+                <div className="w-12 h-12 rounded-full overflow-hidden mx-auto bg-zinc-800 mb-2 ring-2 ring-amber-500/40">
+                  {comparisonData.user2.avatarUrl ? (
+                    <img
+                      src={comparisonData.user2.avatarUrl}
+                      alt={comparisonData.user2.login}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-6 h-6 m-3 text-zinc-500" />
+                  )}
+                </div>
+                <h4 className="font-bold text-white text-base">
+                  {comparisonData.user2.name || comparisonData.user2.login}
+                </h4>
+                <p className="text-xs text-amber-400">@{comparisonData.user2.login}</p>
+                <div className="mt-3 grid grid-cols-2 gap-2 text-left text-xs">
+                  <div className="p-2 rounded bg-zinc-900/60 border border-zinc-800/60">
+                    <div className="text-zinc-500 text-[11px]">Followers</div>
+                    <div className="font-bold text-white text-sm">
+                      {typeof comparisonData.user2.followers === "number"
+                        ? comparisonData.user2.followers.toLocaleString()
+                        : comparisonData.user2.followers?.totalCount?.toLocaleString?.() || 0}
+                    </div>
+                  </div>
+                  <div className="p-2 rounded bg-zinc-900/60 border border-zinc-800/60">
+                    <div className="text-zinc-500 text-[11px]">Public Repos</div>
+                    <div className="font-bold text-white text-sm">
+                      {typeof comparisonData.user2.publicRepos === "number"
+                        ? comparisonData.user2.publicRepos.toLocaleString()
+                        : comparisonData.user2.publicRepos?.totalCount?.toLocaleString?.() || 0}
+                    </div>
                   </div>
                 </div>
               </div>
-              <Link
-                href={`/profiles?username=${comparisonData.user1.login}`}
-                className="mt-4 inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-medium"
-              >
-                View full profile <ArrowRight className="w-3 h-3" />
-              </Link>
             </div>
 
-            {/* Dev 2 Card */}
-            <div className="rounded-xl border border-zinc-800 bg-[#121522] p-4 text-center">
-              <div className="w-12 h-12 rounded-full overflow-hidden mx-auto bg-zinc-800 mb-2">
-                {comparisonData.user2.avatar_url ? (
-                  <img
-                    src={comparisonData.user2.avatar_url}
-                    alt={comparisonData.user2.login}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <User className="w-6 h-6 m-3 text-zinc-500" />
-                )}
-              </div>
-              <h4 className="font-bold text-white text-base">
-                {comparisonData.user2.name || comparisonData.user2.login}
-              </h4>
-              <p className="text-xs text-zinc-400">@{comparisonData.user2.login}</p>
-              <div className="mt-4 grid grid-cols-2 gap-2 text-left text-xs">
-                <div className="p-2 rounded bg-zinc-900/60 border border-zinc-800/60">
-                  <div className="text-zinc-500">Followers</div>
-                  <div className="font-bold text-white text-sm">
-                    {comparisonData.user2.followers?.toLocaleString() || 0}
-                  </div>
-                </div>
-                <div className="p-2 rounded bg-zinc-900/60 border border-zinc-800/60">
-                  <div className="text-zinc-500">Public Repos</div>
-                  <div className="font-bold text-white text-sm">
-                    {comparisonData.user2.public_repos?.toLocaleString() || 0}
-                  </div>
-                </div>
-              </div>
-              <Link
-                href={`/profiles?username=${comparisonData.user2.login}`}
-                className="mt-4 inline-flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 font-medium"
+            {/* Launch Full View Button */}
+            <div className="pt-2 flex justify-center">
+              <button
+                type="button"
+                onClick={handleCompareNow}
+                className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
               >
-                View full profile <ArrowRight className="w-3 h-3" />
-              </Link>
+                <span>Open Full Comparison Page</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
         )}
