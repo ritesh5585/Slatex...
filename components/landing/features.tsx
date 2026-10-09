@@ -3,7 +3,13 @@
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Compass, GitCompare, PlaySquare, GitFork, ArrowUpRight } from "lucide-react";
+import {
+  Compass,
+  GitCompare,
+  PlaySquare,
+  GitFork,
+  ArrowUpRight,
+} from "lucide-react";
 
 interface FeaturesProps {
   onExploreClick?: () => void;
@@ -40,7 +46,12 @@ export function Features({
       description:
         "Profile stats, language mix, contribution history and top repositories.",
       tags: ["Profile", "Repos", "Contributions"],
-      icon: <Compass className="w-5 h-5 text-emerald-400" suppressHydrationWarning />,
+      icon: (
+        <Compass
+          className="w-5 h-5 text-emerald-400"
+          suppressHydrationWarning
+        />
+      ),
       onClick: onExploreClick,
     },
     {
@@ -50,18 +61,13 @@ export function Features({
       description:
         "Put two profiles next to each other: skills, activity and best work.",
       tags: ["Skills", "Graphs", "Top repos"],
-      icon: <GitCompare className="w-5 h-5 text-purple-400" suppressHydrationWarning />,
+      icon: (
+        <GitCompare
+          className="w-5 h-5 text-purple-400"
+          suppressHydrationWarning
+        />
+      ),
       onClick: onCompareClick,
-    },
-    {
-      id: "youtube",
-      title: "YouTube insights",
-      badge: "Coming soon",
-      description:
-        "Paste a channel link to see creator and content analytics.",
-      tags: ["Creator stats", "Engagement"],
-      icon: <PlaySquare className="w-5 h-5 text-rose-400" suppressHydrationWarning />,
-      onClick: onYouTubeClick,
     },
     {
       id: "opensource",
@@ -70,8 +76,24 @@ export function Features({
       description:
         "Beginner-friendly projects that match the skills you already have.",
       tags: ["Skill match", "Trending"],
-      icon: <GitFork className="w-5 h-5 text-indigo-400" suppressHydrationWarning />,
+      icon: (
+        <GitFork className="w-5 h-5 text-indigo-400" suppressHydrationWarning />
+      ),
       onClick: onOpenSourceClick,
+    },
+    {
+      id: "youtube",
+      title: "YouTube insights",
+      badge: "Coming soon",
+      description: "Paste a channel link to see creator and content analytics.",
+      tags: ["Creator stats", "Engagement"],
+      icon: (
+        <PlaySquare
+          className="w-5 h-5 text-rose-400"
+          suppressHydrationWarning
+        />
+      ),
+      onClick: onYouTubeClick,
     },
   ];
 
@@ -97,7 +119,7 @@ export function Features({
               end: "bottom 10%",
               toggleActions: "play reverse play reverse",
             },
-          }
+          },
         );
       }
 
@@ -120,7 +142,7 @@ export function Features({
                 end: "bottom 8%",
                 toggleActions: "play reverse play reverse",
               },
-            }
+            },
           );
         });
       }
@@ -179,7 +201,7 @@ export function Features({
                 </div>
                 <span
                   className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border shrink-0 ${getBadgeStyle(
-                    feature.badge
+                    feature.badge,
                   )}`}
                 >
                   {feature.badge}
@@ -190,7 +212,10 @@ export function Features({
                 <h3 className="text-base sm:text-lg font-bold text-white tracking-tight group-hover:text-indigo-300 transition-colors">
                   {feature.title}
                 </h3>
-                <ArrowUpRight className="w-4 h-4 text-zinc-500 group-hover:text-indigo-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" suppressHydrationWarning />
+                <ArrowUpRight
+                  className="w-4 h-4 text-zinc-500 group-hover:text-indigo-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"
+                  suppressHydrationWarning
+                />
               </div>
 
               {/* Description - Crisp, readable text in Brave & Edge */}

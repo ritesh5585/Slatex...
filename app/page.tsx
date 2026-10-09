@@ -52,8 +52,8 @@ export default function Home() {
         <Features
           onExploreClick={handleFocusSearch}
           onCompareClick={() => setIsCompareOpen(true)}
-          onYouTubeClick={() => setIsYouTubeOpen(true)}
           onOpenSourceClick={() => setIsOpenSourceOpen(true)}
+          onYouTubeClick={() => setIsYouTubeOpen(true)}
         />
 
         {/* Stats Metrics Banner: 10M+, 2M+, 50K+, 100K+ */}
@@ -71,13 +71,13 @@ export default function Home() {
         isOpen={isCompareOpen}
         onClose={() => setIsCompareOpen(false)}
       />
-      <YouTubeModal
-        isOpen={isYouTubeOpen}
-        onClose={() => setIsYouTubeOpen(false)}
-      />
       <OpenSourceModal
         isOpen={isOpenSourceOpen}
         onClose={() => setIsOpenSourceOpen(false)}
+      />
+      <YouTubeModal
+        isOpen={isYouTubeOpen}
+        onClose={() => setIsYouTubeOpen(false)}
       />
       <ProfilePromptModal
         isOpen={isProfilePromptOpen}

@@ -6,8 +6,8 @@ export default function Loading() {
     <main className="h-screen overflow-hidden bg-[#08090f] text-zinc-100 antialiased flex">
       <aside className="hidden md:flex h-full w-52 shrink-0 flex-col border-r border-zinc-800/60 bg-[#0d0e17] p-4">
         <div className="mb-7 flex items-center gap-2.5 px-2">
-          <Skeleton className="h-8 w-8 rounded-lg" />
-          <Skeleton className="h-4 w-20 rounded-md" />
+          {/* <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-4 w-20 rounded-md" /> */}
         </div>
         <div className="space-y-2">
           {[0, 1, 2, 3].map((item) => (

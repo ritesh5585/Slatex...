@@ -9,6 +9,7 @@ import { ContributionHeatmap } from "@/components/user/contribution-heatmap";
 import { CommitActivity } from "@/components/user/commit-activity";
 import { getLanguageColor } from "@/lib/language-colors";
 import Link from "next/link";
+import ErrorPage from "@/components/shared/Error";
 
 import {
   getUserByUsername,
@@ -22,30 +23,10 @@ interface Props {
   searchParams: Promise<{ username?: string }>;
 }
 
-// ── Error / empty states ──────────────────────────────────────────────────────
-function ErrorPage({ icon: Icon, iconClass, title, description }: {
-  icon: React.ElementType; iconClass: string; title: string; description: React.ReactNode;
-}) {
-  return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-4">
-
-      <Card className="max-w-md w-full p-8 text-center border-zinc-800 bg-zinc-900/60 backdrop-blur-xl space-y-4">
-        <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ring-1 ${iconClass}`}>
-          <Icon className="h-7 w-7" />
-        </div>
-        <div className="space-y-1">
-          <h1 className="text-xl font-bold tracking-tight text-white">{title}</h1>
-          <p className="text-sm text-zinc-400">{description}</p>
-        </div>
-        <div className="pt-2 flex justify-center"><BackButton /></div>
-      </Card>
-    </main>
-  );
-}
-
 export default async function ResultPage({ searchParams }: Props) {
   const { username } = await searchParams;
 
+  console.log("Username:", username);
   if (!username || !username.trim()) {
     return (
       <ErrorPage
@@ -75,7 +56,15 @@ export default async function ResultPage({ searchParams }: Props) {
           icon={UserX}
           iconClass="bg-red-500/10 text-red-400 ring-red-500/20"
           title="User Not Found"
-          description={<>Could not find GitHub user <span className="font-semibold text-zinc-200">@{cleanUsername}</span>. Please check the spelling and try again.</>}
+          description={
+            <>
+              Could not find GitHub user{" "}
+              <span className="font-semibold text-zinc-200">
+                @{cleanUsername}
+              </span>
+              . Please check the spelling and try again.
+            </>
+          }
         />
       );
     }
@@ -115,9 +104,12 @@ export default async function ResultPage({ searchParams }: Props) {
 
   const languageCount: Record<string, number> = {};
   repos.forEach((repo) => {
-    if (repo.language) languageCount[repo.language] = (languageCount[repo.language] || 0) + 1;
+    if (repo.language)
+      languageCount[repo.language] = (languageCount[repo.language] || 0) + 1;
   });
-  const topLanguages: [string, number][] = Object.entries(languageCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const topLanguages: [string, number][] = Object.entries(languageCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
   const totalLangCount = topLanguages.reduce((s, [, c]) => s + c, 0);
 
   const contributions = contributionData.contributions.map((day) => ({
@@ -127,11 +119,21 @@ export default async function ResultPage({ searchParams }: Props) {
   const totalContributions = contributionData.totalContributions;
 
   // Top 4 repos by stars for the sidebar
-  const topRepos = [...repos].sort((a, b) => b.stargazers_count - a.stargazers_count).slice(0, 4);
-  const recentRepos = [...repos].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 4);
+  const topRepos = [...repos]
+    .sort((a, b) => b.stargazers_count - a.stargazers_count)
+    .slice(0, 4);
+  const recentRepos = [...repos]
+    .sort(
+      (a, b) =>
+        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+    )
+    .slice(0, 4);
 
   const formattedJoinDate = user.createdAt
-    ? new Date(user.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+    ? new Date(user.createdAt).toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      })
     : null;
 
   const recentlyViewed = [
@@ -165,7 +167,6 @@ export default async function ResultPage({ searchParams }: Props) {
         {/* Scrollable Content */}
         <div className="relative z-10 flex-1 overflow-y-auto">
           <div className="px-4 sm:px-6 py-6 space-y-5 max-w-6xl mx-auto">
-
             {/* ── Profile Hero Card ──────────────────────────────────────── */}
             <Card className="p-5 border-zinc-800/60 bg-zinc-900/40 backdrop-blur-md">
               <div className="flex items-start gap-4">
@@ -185,34 +186,58 @@ export default async function ResultPage({ searchParams }: Props) {
                 {/* Info */}
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                    <h1 className="text-xl font-bold text-white tracking-tight">{user.name || user.login}</h1>
-                    <span className="text-sm text-zinc-500 font-mono">@{user.login}</span>
+                    <h1 className="text-xl font-bold text-white tracking-tight">
+                      {user.name || user.login}
+                    </h1>
+                    <span className="text-sm text-zinc-500 font-mono">
+                      @{user.login}
+                    </span>
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-zinc-500">
                     {user.location && (
-                      <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{user.location}</span>
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {user.location}
+                      </span>
                     )}
                     {formattedJoinDate && (
-                      <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />Joined {formattedJoinDate}</span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        Joined {formattedJoinDate}
+                      </span>
                     )}
-                    <a href={user.url} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-300 transition-colors">
+                    <a
+                      href={user.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-zinc-300 transition-colors"
+                    >
                       github.com/{user.login}
                     </a>
                   </div>
-                  {user.bio && <p className="mt-2 text-sm text-zinc-300 leading-relaxed">{user.bio}</p>}
+                  {user.bio && (
+                    <p className="mt-2 text-sm text-zinc-300 leading-relaxed">
+                      {user.bio}
+                    </p>
+                  )}
                 </div>
               </div>
 
               {/* Stats Row */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-4 border-t border-zinc-800/60">
                 {[
-                  { label: "Public repos", value: user.repositories.totalCount },
+                  {
+                    label: "Public repos",
+                    value: user.repositories.totalCount,
+                  },
                   { label: "Followers", value: user.followers.totalCount },
                   { label: "Following", value: user.following.totalCount },
                   { label: "Contributions", value: totalContributions },
                 ].map(({ label, value }) => (
                   <div key={label} className="text-center">
-                    <div className="text-2xl font-bold text-white tabular-nums">{value.toLocaleString()}</div>
+                    <div className="text-2xl font-bold text-white tabular-nums">
+                      {value.toLocaleString()}
+                    </div>
                     <div className="text-xs text-zinc-500 mt-0.5">{label}</div>
                   </div>
                 ))}
@@ -220,37 +245,62 @@ export default async function ResultPage({ searchParams }: Props) {
             </Card>
 
             {/* ── Streaks Row ───────────────────────────────────────────── */}
-            <ContributionStreaks contributions={contributions} totalContributions={totalContributions} />
+            <ContributionStreaks
+              contributions={contributions}
+              totalContributions={totalContributions}
+            />
 
             {/* ── Middle Row: Contributions + Top Languages ─────────────── */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
               {/* Contributions Heatmap */}
               <Card className="lg:col-span-2 p-5 border-zinc-800/60 bg-zinc-900/40 backdrop-blur-md">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-sm font-semibold text-white">Contributions</h2>
-                  <span className="text-[11px] text-zinc-500 bg-zinc-800/60 rounded-full px-2.5 py-1 border border-zinc-700/40">Last 12 months</span>
+                  <h2 className="text-sm font-semibold text-white">
+                    Contributions
+                  </h2>
+                  <span className="text-[11px] text-zinc-500 bg-zinc-800/60 rounded-full px-2.5 py-1 border border-zinc-700/40">
+                    Last 12 months
+                  </span>
                 </div>
                 <ContributionHeatmap contributions={contributions} />
               </Card>
 
               {/* Top Languages */}
               <Card className="p-5 border-zinc-800/60 bg-zinc-900/40 backdrop-blur-md">
-                <h2 className="text-sm font-semibold text-white mb-4">Top languages</h2>
+                <h2 className="text-sm font-semibold text-white mb-4">
+                  Top languages
+                </h2>
                 <div className="space-y-3">
                   {topLanguages.map(([name, count]) => {
-                    const pct = totalLangCount > 0 ? Math.round((count / totalLangCount) * 100) : 0;
+                    const pct =
+                      totalLangCount > 0
+                        ? Math.round((count / totalLangCount) * 100)
+                        : 0;
                     const color = getLanguageColor(name);
                     return (
                       <div key={name} className="flex items-center gap-3">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                          <span className="text-sm text-zinc-200 truncate">{name}</span>
+                          <span
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ backgroundColor: color }}
+                          />
+                          <span className="text-sm text-zinc-200 truncate">
+                            {name}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <div className="w-20 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: color }} />
+                            <div
+                              className="h-full rounded-full transition-all duration-700"
+                              style={{
+                                width: `${pct}%`,
+                                backgroundColor: color,
+                              }}
+                            />
                           </div>
-                          <span className="text-xs text-zinc-500 tabular-nums w-8 text-right">{pct}%</span>
+                          <span className="text-xs text-zinc-500 tabular-nums w-8 text-right">
+                            {pct}%
+                          </span>
                         </div>
                       </div>
                     );
@@ -264,8 +314,12 @@ export default async function ResultPage({ searchParams }: Props) {
               {/* Commit Activity */}
               <Card className="p-5 border-zinc-800/60 bg-zinc-900/40 backdrop-blur-md">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-sm font-semibold text-white">Commit activity</h2>
-                  <span className="text-[11px] text-zinc-500 bg-zinc-800/60 rounded-full px-2.5 py-1 border border-zinc-700/40">Last 12 weeks</span>
+                  <h2 className="text-sm font-semibold text-white">
+                    Commit activity
+                  </h2>
+                  <span className="text-[11px] text-zinc-500 bg-zinc-800/60 rounded-full px-2.5 py-1 border border-zinc-700/40">
+                    Last 12 weeks
+                  </span>
                 </div>
                 <CommitActivity contributions={contributions} />
               </Card>
@@ -273,10 +327,16 @@ export default async function ResultPage({ searchParams }: Props) {
               {/* Repositories */}
               <Card className="p-5 border-zinc-800/60 bg-zinc-900/40 backdrop-blur-md">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-sm font-semibold text-white">Repositories</h2>
+                  <h2 className="text-sm font-semibold text-white">
+                    Repositories
+                  </h2>
                   <div className="flex gap-1 text-xs">
-                    <span className="px-2.5 py-1 rounded-full bg-zinc-700/50 text-zinc-300 font-medium">Top</span>
-                    <span className="px-2.5 py-1 rounded-full text-zinc-500 hover:bg-zinc-800/60 cursor-pointer transition-colors">Recent</span>
+                    <span className="px-2.5 py-1 rounded-full bg-zinc-700/50 text-zinc-300 font-medium">
+                      Top
+                    </span>
+                    <span className="px-2.5 py-1 rounded-full text-zinc-500 hover:bg-zinc-800/60 cursor-pointer transition-colors">
+                      Recent
+                    </span>
                   </div>
                 </div>
                 <div className="space-y-0 divide-y divide-zinc-800/50">
@@ -288,14 +348,23 @@ export default async function ResultPage({ searchParams }: Props) {
                         href={`/repo?owner=${repo.owner.login}&repo=${repo.name}`}
                         className="flex items-start gap-3 py-3 first:pt-0 last:pb-0 group hover:bg-zinc-800/20 -mx-1 px-1 rounded-lg transition-colors"
                       >
-                        <span className="mt-1.5 h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                        <span
+                          className="mt-1.5 h-2 w-2 rounded-full shrink-0"
+                          style={{ backgroundColor: color }}
+                        />
                         <div className="min-w-0 flex-1">
-                          <div className="text-sm font-semibold text-zinc-100 group-hover:text-white truncate">{repo.name}</div>
+                          <div className="text-sm font-semibold text-zinc-100 group-hover:text-white truncate">
+                            {repo.name}
+                          </div>
                           {repo.description && (
-                            <div className="text-xs text-zinc-500 line-clamp-1 mt-0.5">{repo.description}</div>
+                            <div className="text-xs text-zinc-500 line-clamp-1 mt-0.5">
+                              {repo.description}
+                            </div>
                           )}
                         </div>
-                        <span className="shrink-0 text-xs text-zinc-500 font-mono">{repo.language || "—"}</span>
+                        <span className="shrink-0 text-xs text-zinc-500 font-mono">
+                          {repo.language || "—"}
+                        </span>
                       </Link>
                     );
                   })}
@@ -306,31 +375,59 @@ export default async function ResultPage({ searchParams }: Props) {
             {/* ── Recent Commits ─────────────────────────────────────────── */}
             <Card className="p-5 border-zinc-800/60 bg-zinc-900/40 background-blur-md">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-semibold text-white">Recent commits</h2>
-                <a href={user.url} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+                <h2 className="text-sm font-semibold text-white">
+                  Recent commits
+                </h2>
+                <a
+                  href={user.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                >
                   View all
                 </a>
               </div>
               {contributions.length === 0 ? (
-                <p className="text-sm text-zinc-500 text-center py-4">No recent commits found.</p>
+                <p className="text-sm text-zinc-500 text-center py-4">
+                  No recent commits found.
+                </p>
               ) : (
                 <div className="space-y-0 divide-y divide-zinc-800/50">
-                  {contributions.slice(-5).reverse().map((day, i) => {
-                    if (day.count === 0) return null;
-                    const date = new Date(day.date);
-                    const hoursAgo = Math.round((Date.now() - date.getTime()) / 3600000);
-                    const timeLabel = hoursAgo < 24 ? `${hoursAgo}h ago` : `${Math.round(hoursAgo / 24)}d ago`;
-                    return (
-                      <div key={day.date} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                        <span className="h-2 w-2 rounded-full bg-indigo-500 shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <div className="text-sm font-semibold text-zinc-100">{day.count} contribution{day.count !== 1 ? "s" : ""}</div>
-                          <div className="text-xs text-zinc-500">{user.login} · {timeLabel}</div>
+                  {contributions
+                    .slice(-5)
+                    .reverse()
+                    .map((day, i) => {
+                      if (day.count === 0) return null;
+                      const date = new Date(day.date);
+                      const hoursAgo = Math.round(
+                        (Date.now() - date.getTime()) / 3600000,
+                      );
+                      const timeLabel =
+                        hoursAgo < 24
+                          ? `${hoursAgo}h ago`
+                          : `${Math.round(hoursAgo / 24)}d ago`;
+                      return (
+                        <div
+                          key={day.date}
+                          className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+                        >
+                          <span className="h-2 w-2 rounded-full bg-indigo-500 shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-semibold text-zinc-100">
+                              {day.count} contribution
+                              {day.count !== 1 ? "s" : ""}
+                            </div>
+                            <div className="text-xs text-zinc-500">
+                              {user.login} · {timeLabel}
+                            </div>
+                          </div>
+                          <span className="shrink-0 text-xs font-mono text-zinc-600">
+                            {day.date.slice(2).replace(/-/g, "").slice(0, 6)}
+                          </span>
                         </div>
-                        <span className="shrink-0 text-xs font-mono text-zinc-600">{day.date.slice(2).replace(/-/g, "").slice(0, 6)}</span>
-                      </div>
-                    );
-                  }).filter(Boolean)}
+                      );
+                    })
+                    .filter(Boolean)}
                 </div>
               )}
             </Card>
@@ -345,4 +442,3 @@ export default async function ResultPage({ searchParams }: Props) {
     </main>
   );
 }
-
