@@ -26,7 +26,6 @@ interface Props {
 export default async function ResultPage({ searchParams }: Props) {
   const { username } = await searchParams;
 
-  console.log("Username:", username);
   if (!username || !username.trim()) {
     return (
       <ErrorPage

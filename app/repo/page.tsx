@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertCircle, ArrowLeft, UserX } from "lucide-react";
+import { AlertCircle, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RepoPageClient } from "@/components/repo/repo-page-client";
@@ -81,10 +81,10 @@ export default async function RepoPage({ searchParams }: Props) {
   if (!owner || !name) {
     return (
       <ErrorShell
-        icon={<AlertCircle className="h-7 w-7" />}
+        icon={AlertCircle}
+        iconClass="bg-amber-500/10 text-amber-400 ring-amber-500/20"
         title="Invalid Repository"
         description="Provide a GitHub repo URL or owner and repository name."
-        tone="amber"
       />
     );
   }
@@ -119,6 +119,8 @@ export default async function RepoPage({ searchParams }: Props) {
         { headers, next: { revalidate: 1800 } }
       ),
     ]);
+
+    console.log("Repo:", repo);
 
     const [contributorData, activityData] = await Promise.all([
       contributorsResponse.ok ? contributorsResponse.json() : [],
@@ -231,7 +233,8 @@ export default async function RepoPage({ searchParams }: Props) {
     if (error instanceof NotFoundError) {
       return (
         <ErrorShell
-          icon={<UserX className="h-7 w-7" />}
+          icon={UserX}
+          iconClass="bg-red-500/10 text-red-400 ring-red-500/20"
           title="Repository Not Found"
           description={`${owner}/${name} is private or does not exist.`}
         />
@@ -240,16 +243,17 @@ export default async function RepoPage({ searchParams }: Props) {
     if (error instanceof RateLimitError) {
       return (
         <ErrorShell
-          icon={<AlertCircle className="h-7 w-7" />}
+          icon={AlertCircle}
+          iconClass="bg-amber-500/10 text-amber-400 ring-amber-500/20"
           title="API Rate Limit Reached"
           description="GitHub's API rate limit was reached. Please try again later."
-          tone="amber"
         />
       );
     }
     return (
       <ErrorShell
-        icon={<AlertCircle className="h-7 w-7" />}
+        icon={AlertCircle}
+        iconClass="bg-red-500/10 text-red-400 ring-red-500/20"
         title="Unable to Fetch Repository"
         description="GitHub data could not be loaded. Please try again."
       />
