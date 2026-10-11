@@ -19,7 +19,7 @@ interface RepoLayoutProps {
   pushedAt?: string | null;
   defaultBranch?: string | null;
   children: React.ReactNode;
-  sections: { id: string; ref: React.RefObject<HTMLElement | null> }[];
+  sections?: { id: string; ref: React.RefObject<HTMLElement | null> }[];
 }
 
 export function RepoLayout({
@@ -38,49 +38,80 @@ export function RepoLayout({
   const [activeSection, setActiveSection] = useState("overview");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to section on sidebar click
   const handleSectionChange = (sectionId: string) => {
     setActiveSection(sectionId);
-    const target = sections.find((s) => s.id === sectionId);
-    if (target?.ref.current) {
-      target.ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    if (sections) {
+      const target = sections.find((s) => s.id === sectionId);
+      if (target?.ref.current) {
+        target.ref.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+        return;
+      }
+    }
+
+    const el = scrollRef.current?.querySelector(`#repo-section-${sectionId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
-  // Observe scroll to update active section
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const targetIds = sections
+      ? sections.map((s) => s.id)
+      : ["overview", "activity", "commits", "people", "releases", "readme"];
+
+    const observers: IntersectionObserver[] = [];
+
+    targetIds.forEach((id) => {
+      let el: Element | null | undefined = null;
+      if (sections) {
+        el = sections.find((s) => s.id === id)?.ref.current;
+      }
+      if (!el) {
+        el = container.querySelector(`#repo-section-${id}`);
+      }
+
+      if (!el) return;
+
+      const obs = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) setActiveSection(id);
           }
-        }
-      },
-      { threshold: 0.3, rootMargin: "-80px 0px -60% 0px" }
-    );
-    sections.forEach((s) => {
-      if (s.ref.current) observer.observe(s.ref.current);
+        },
+        { root: container, threshold: 0.25, rootMargin: "-64px 0px -55% 0px" },
+      );
+      obs.observe(el);
+      observers.push(obs);
     });
-    return () => observer.disconnect();
+
+    return () => observers.forEach((o) => o.disconnect());
   }, [sections]);
 
-  // GSAP entrance animation
+  // GSAP Entrance Animation
   useEffect(() => {
     if (!scrollRef.current) return;
-    const cards = scrollRef.current.querySelectorAll(".repo-card-anim");
-    gsap.fromTo(
-      cards,
-      { opacity: 0, y: 28 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.55,
-        stagger: 0.08,
-        ease: "power3.out",
-        clearProps: "all",
-      }
-    );
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        ".repo-card-anim",
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.07,
+          ease: "power3.out",
+          delay: 0.1,
+        },
+      );
+    }, scrollRef);
+    return () => ctx.revert();
   }, []);
 
   return (
@@ -103,7 +134,7 @@ export function RepoLayout({
       </div>
 
       {/* Main */}
-      <div className="relative flex-1 flex flex-col min-w-0 overflow-hidden bg-[#08090f]">
+      <div className="relative flex-1 flex flex-col min-w-0 overflow-hidden bg-[#08090f] selection:bg-indigo-500/30 selection:text-indigo-200">
         {/* Glow effects */}
         <div className="hero-glow" />
         <div className="hero-grid absolute inset-0 opacity-[0.06] pointer-events-none" />
@@ -124,7 +155,10 @@ export function RepoLayout({
         />
 
         {/* Scrollable content */}
-        <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto scroll-smooth">
+        <div
+          ref={scrollRef}
+          className="relative z-10 flex-1 overflow-y-auto scroll-smooth"
+        >
           {children}
         </div>
       </div>

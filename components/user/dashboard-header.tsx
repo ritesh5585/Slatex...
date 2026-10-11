@@ -52,7 +52,7 @@ export function DashboardHeader({
       id: "repos",
       label: "Repositories",
       icon: BookOpen,
-      href: `/profiles/repos?username=${encodeURIComponent(cleanUser)}`,
+      href: `/profiles/repositories?username=${encodeURIComponent(cleanUser)}`,
     },
     {
       id: "commits",

@@ -1,5 +1,3 @@
-// lib/github-contributions.ts
-
 export interface ContributionDay {
   date: string;
   count: number;

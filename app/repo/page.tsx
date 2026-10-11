@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AlertCircle, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { RepoPageClient } from "@/components/repo/repo-page-client";
+import { RepoLayout as RepoPageClient } from "@/components/repo/repo-layout";
 import { CommitActivity } from "@/components/repo/commit-activity";
 import { CommitTimeline } from "@/components/repo/commit-timeline";
 import { ContributorsList } from "@/components/repo/contributors-list";
@@ -40,43 +40,6 @@ function parseRepoParams({ owner, repo, url }: Awaited<Props["searchParams"]>) {
     return { owner: "", name: "" };
   }
 }
-
-// function ErrorShell({
-//   icon,
-//   title,
-//   description,
-//   tone = "red",
-// }: {
-//   icon: React.ReactNode;
-//   title: string;
-//   description: React.ReactNode;
-//   tone?: "amber" | "red";
-// }) {
-//   const colors =
-//     tone === "amber"
-//       ? "bg-amber-500/10 text-amber-400 ring-amber-500/20"
-//       : "bg-red-500/10 text-red-400 ring-red-500/20";
-
-//   return (
-//     <main className="flex min-h-screen items-center justify-center bg-[#08090f] p-4">
-//       <Card className="w-full max-w-md space-y-4 border-zinc-800 bg-zinc-900/60 p-8 text-center backdrop-blur-md">
-//         <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ring-1 ${colors}`}>
-//           {icon}
-//         </div>
-//         <div className="space-y-1">
-//           <h1 className="text-xl font-bold text-white">{title}</h1>
-//           <p className="text-sm text-zinc-400">{description}</p>
-//         </div>
-//         <Link href="/">
-//           <Button variant="outline" className="gap-2 mt-2">
-//             <ArrowLeft className="h-4 w-4" />
-//             Back to Search
-//           </Button>
-//         </Link>
-//       </Card>
-//     </main>
-//   );
-// }
 
 export default async function RepoPage({ searchParams }: Props) {
   const { owner, name } = parseRepoParams(await searchParams);

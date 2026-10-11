@@ -75,7 +75,7 @@ export function DashboardSidebar({
       label: "Repositories",
       icon: BookOpen,
       href: cleanUser
-        ? `/profiles/repos?username=${encodeURIComponent(cleanUser)}`
+        ? `/profiles/repositories?username=${encodeURIComponent(cleanUser)}`
         : "/profiles",
     },
     {
