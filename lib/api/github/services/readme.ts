@@ -1,5 +1,5 @@
 import { githubGraphQL } from "../client";
-import { NotFoundError } from "../errors";
+import { NotFoundError } from "@/lib/api/with-github-errors";
 import { GET_REPO_README_QUERY } from "../queries/repo.query";
 
 interface ReadmeResponse {

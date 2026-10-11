@@ -124,7 +124,7 @@ export function DashboardSidebar({
             return (
               <Link
                 key={id}
-                href={href}
+                href={href as any}
                 onClick={(e) => {
                   if (isCompare && cleanUser) {
                     handleCompareClick(e);
@@ -169,7 +169,7 @@ export function DashboardSidebar({
               {recentlyViewed.map(({ label, href }) => (
                 <Link
                   key={label}
-                  href={href}
+                  href={href as any}
                   onClick={onItemClick}
                   className="px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 rounded-lg hover:bg-zinc-800/50 transition-all duration-150 truncate flex items-center gap-1.5 group"
                 >

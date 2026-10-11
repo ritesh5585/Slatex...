@@ -5,7 +5,6 @@ import {
   Navbar,
   Hero,
   Features,
-  StatsBanner,
   CtaBanner,
   Footer,
   CompareModal,
@@ -55,9 +54,6 @@ export default function Home() {
           onOpenSourceClick={() => setIsOpenSourceOpen(true)}
           onYouTubeClick={() => setIsYouTubeOpen(true)}
         />
-
-        {/* Stats Metrics Banner: 10M+, 2M+, 50K+, 100K+ */}
-        <StatsBanner />
 
         {/* Purple CTA Banner: See your own GitHub story */}
         <CtaBanner onAnalyzeProfile={() => setIsProfilePromptOpen(true)} />

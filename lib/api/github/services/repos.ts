@@ -3,7 +3,7 @@ import {
   GET_REPO_QUERY,
   GET_REPO_LANGUAGES_QUERY,
 } from "../queries/repo.query";
-import { NotFoundError } from "../errors";
+import { NotFoundError } from "@/lib/api/with-github-errors";
 import type { GitHubRepoGQL } from "../types";
 
 interface RepoResponse {

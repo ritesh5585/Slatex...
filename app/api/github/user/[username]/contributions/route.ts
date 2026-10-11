@@ -1,22 +1,14 @@
 import { NextResponse } from "next/server";
-import { getUserContributions, GitHubGraphQLError } from "@/lib/api/github";
+import { getUserContributions } from "@/lib/api/github";
+import { withGithubErrors } from "@/lib/api/with-github-errors";
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ username: string }> },
-) {
-  const { username } = await params;
-
-  try {
+export const GET = withGithubErrors(
+  async (
+    _req: Request,
+    { params }: { params: Promise<{ username: string }> },
+  ) => {
+    const { username } = await params;
     const data = await getUserContributions(username);
     return NextResponse.json(data);
-  } catch (err) {
-    if (err instanceof GitHubGraphQLError) {
-      return NextResponse.json(
-        { error: err.message },
-        { status: err.status || 500 },
-      );
-    }
-    return NextResponse.json({ error: "Unknown error" }, { status: 500 });
-  }
-}
+  },
+);

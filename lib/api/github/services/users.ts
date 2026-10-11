@@ -3,7 +3,7 @@ import {
   GET_USER_QUERY,
   GET_USER_REPOS_QUERY,
 } from "../queries/user.query";
-import { NotFoundError } from "../errors";
+import { NotFoundError } from "@/lib/api/with-github-errors";
 import type { GitHubUserGQL, GitHubUserRepoGQL } from "../types";
 
 interface UserResponse {

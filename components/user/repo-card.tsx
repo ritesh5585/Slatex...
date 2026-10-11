@@ -7,21 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { getLanguageColor } from "@/lib/language-colors";
 import Link from "next/link";
 
-export interface GitHubRepo {
-  id: string;
-  name: string;
-  owner: {
-    login: string;
-    avatar_url: string;
-  };
-  description: string | null;
-  html_url: string;
-  language: string | null;
-  stargazers_count: number;
-  forks_count: number;
-  updated_at: string;
-  topics?: string[];
-}
+import type { GitHubRepo } from "@/lib/api/github/types";
+export type { GitHubRepo };
 
 interface RepoCardProps {
   repo: GitHubRepo;

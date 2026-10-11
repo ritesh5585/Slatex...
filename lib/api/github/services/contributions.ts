@@ -3,7 +3,7 @@ import {
   GET_CONTRIBUTIONS_QUERY,
   GET_USER_COMMIT_CONTRIBUTIONS_QUERY,
 } from "../queries/contributions.query";
-import { NotFoundError } from "../errors";
+import { NotFoundError } from "@/lib/api/with-github-errors";
 import type {
   ContributionCalendar,
   RepoCommitContribution,

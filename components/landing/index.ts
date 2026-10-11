@@ -1,7 +1,6 @@
 export * from "./navbar";
 export * from "./hero";
 export * from "./features";
-export * from "./stats-banner";
 export * from "./cta-banner";
 export * from "./footer";
 export * from "./compare-modal";

@@ -13,7 +13,8 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import type { GitHubCommitActivityWeek } from "@/lib/github";
+import type { GitHubCommitActivityWeek } from "@/lib/api/github/types";
+
 
 interface Props {
   activity: GitHubCommitActivityWeek[];

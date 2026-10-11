@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { compareGitHubUsers } from "@/lib/api/github/services/compare";
-import { GitHubGraphQLError } from "@/lib/api/github";
+import { withGithubErrors } from "@/lib/api/with-github-errors";
 
-export async function GET(req: Request) {
+export const GET = withGithubErrors(async (req: Request) => {
   const { searchParams } = new URL(req.url);
   const user1 = searchParams.get("user1")?.trim();
   const user2 = searchParams.get("user2")?.trim();
@@ -21,19 +21,6 @@ export async function GET(req: Request) {
     );
   }
 
-  try {
-    const result = await compareGitHubUsers(user1, user2);
-    return NextResponse.json(result);
-  } catch (err: any) {
-    if (err instanceof GitHubGraphQLError) {
-      return NextResponse.json(
-        { error: err.message },
-        { status: err.status || 500 },
-      );
-    }
-    return NextResponse.json(
-      { error: err?.message || "Failed to compare users." },
-      { status: 500 },
-    );
-  }
-}
+  const result = await compareGitHubUsers(user1, user2);
+  return NextResponse.json(result);
+});

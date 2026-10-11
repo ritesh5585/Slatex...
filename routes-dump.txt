@@ -1,0 +1,26 @@
+﻿import { NextResponse } from "next/server";
+import { compareGitHubUsers } from "@/lib/api/github/services/compare";
+import { withGithubErrors } from "@/lib/api/with-github-errors";
+
+export const GET = withGithubErrors(async (req: Request) => {
+  const { searchParams } = new URL(req.url);
+  const user1 = searchParams.get("user1")?.trim();
+  const user2 = searchParams.get("user2")?.trim();
+
+  if (!user1 || !user2) {
+    return NextResponse.json(
+      { error: "Both user1 and user2 query parameters are required." },
+      { status: 400 },
+    );
+  }
+
+  if (user1.toLowerCase() === user2.toLowerCase()) {
+    return NextResponse.json(
+      { error: "Please pick two different GitHub accounts to compare." },
+      { status: 400 },
+    );
+  }
+
+  const result = await compareGitHubUsers(user1, user2);
+  return NextResponse.json(result);
+});

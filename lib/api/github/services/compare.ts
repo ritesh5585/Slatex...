@@ -1,7 +1,15 @@
 import { githubGraphQL } from "../client";
 import { COMPARE_QUERY } from "../queries/compare.query";
-import { NotFoundError } from "../errors";
+import { GitHubAPIError, NotFoundError } from "@/lib/api/with-github-errors";
 import { getLanguageColor } from "@/lib/language-colors";
+import type {
+  ComparedUser,
+  MonthlyPoint,
+  ComparisonInsight,
+  ComparisonResult,
+} from "../types";
+
+export type { ComparedUser, MonthlyPoint, ComparisonInsight, ComparisonResult };
 
 interface RawUserNode {
   login: string;
@@ -44,75 +52,6 @@ interface RawUserNode {
       stargazerCount: number;
     }[];
   };
-}
-
-export interface ComparedUser {
-  login: string;
-  name: string | null;
-  avatarUrl: string;
-  bio: string | null;
-  location: string | null;
-  company: string | null;
-  url: string;
-  createdAt: string;
-  joinedFormatted: string;
-  followers: number;
-  following: number;
-  publicRepos: number;
-  totalStars: number;
-  totalContributions: number;
-  totalCommits: number;
-  languages: { name: string; count: number; color: string; percent: number }[];
-  topRepos: {
-    id: string;
-    name: string;
-    description: string | null;
-    url: string;
-    stars: number;
-    forks: number;
-    language: string | null;
-    languageColor: string | null;
-  }[];
-}
-
-export interface MonthlyPoint {
-  month: string;
-  u1: number;
-  u2: number;
-}
-
-export interface ComparisonInsight {
-  verdict: string;
-  overallWinner: string;
-  winnerName: string;
-  score: { u1Wins: number; u2Wins: number };
-  moreProjects: { winner: string; count: number; diff: number };
-  bestContent: {
-    winner: string;
-    stars: number;
-    topRepo: string;
-    topRepoStars: number;
-  };
-  mostActive: { winner: string; contributions: number; commits: number };
-  languageAnalysis: {
-    u1Primary: string;
-    u2Primary: string;
-    u1Langs: string[];
-    u2Langs: string[];
-    sharedLangs: string[];
-    summary: string;
-  };
-  strengths: {
-    u1: string[];
-    u2: string[];
-  };
-}
-
-export interface ComparisonResult {
-  user1: ComparedUser;
-  user2: ComparedUser;
-  monthlyData: MonthlyPoint[];
-  insight: ComparisonInsight;
 }
 
 function formatJoinDate(iso: string) {
@@ -395,7 +334,7 @@ export async function compareGitHubUsers(
   const u2 = username2.trim().replace(/^@/, "");
 
   if (!u1 || !u2) {
-    throw new Error("Both usernames are required to perform a comparison");
+    throw new GitHubAPIError("Both usernames are required to perform a comparison", 400);
   }
 
   const raw = await githubGraphQL<{

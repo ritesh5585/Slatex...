@@ -19,7 +19,10 @@ import {
   NotFoundError,
   RateLimitError,
 } from "@/lib/api/github";
-import type { GitHubCommitActivityWeek, GitHubContributor } from "@/lib/github";
+import type {
+  GitHubCommitActivityWeek,
+  GitHubContributor,
+} from "@/lib/api/github/types";
 
 interface Props {
   searchParams: Promise<{ owner?: string; repo?: string; url?: string }>;

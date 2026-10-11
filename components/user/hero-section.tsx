@@ -16,20 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyToast } from "@/components/shared/copy-toast";
 
-export interface GitHubUser {
-  avatar_url: string;
-  name: string | null;
-  login: string;
-  bio: string | null;
-  company: string | null;
-  location: string | null;
-  blog: string | null;
-  public_repos: number;
-  followers: number;
-  following: number;
-  created_at: string;
-  html_url: string;
-}
+import type { GitHubUser } from "@/lib/api/github/types";
+export type { GitHubUser };
 
 interface HeroSectionProps {
   user: GitHubUser;

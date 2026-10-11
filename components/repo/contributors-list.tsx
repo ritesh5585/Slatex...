@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import type { GitHubContributor } from "@/lib/github";
+import type { GitHubContributor } from "@/lib/api/github/types";
 
 interface Props {
   contributors: GitHubContributor[];
