@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   BookOpen,
@@ -24,12 +24,24 @@ interface SidebarProps {
 
 export function DashboardSidebar({
   username = "",
-  activeTab = "overview",
+  activeTab,
   recentlyViewed = [],
   onItemClick,
 }: SidebarProps) {
   const router = useRouter();
-  const cleanUser = username ? username.trim().replace(/^@/, "") : "";
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const urlUser = searchParams?.get("username") || "";
+  const cleanUser = (username || urlUser).trim().replace(/^@/, "");
+
+  const currentTab =
+    activeTab ||
+    (pathname?.includes("/repositories")
+      ? "repos"
+      : pathname?.includes("/commits")
+        ? "commits"
+        : "overview");
   const [showPromptModal, setShowPromptModal] = useState(false);
   const [secondUser, setSecondUser] = useState("");
   const [inputError, setInputError] = useState("");
@@ -120,7 +132,7 @@ export function DashboardSidebar({
         {/* Nav Items */}
         <nav className="flex flex-col gap-1">
           {navItems.map(({ id, label, icon: Icon, badge, href, isCompare }) => {
-            const isActive = activeTab === id;
+            const isActive = currentTab === id;
             return (
               <Link
                 key={id}

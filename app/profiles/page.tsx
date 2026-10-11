@@ -2,7 +2,6 @@ import { UserX, AlertCircle, RefreshCw, MapPin, Calendar } from "lucide-react";
 import { type GitHubRepo } from "@/components/user/repo-card";
 import { Card } from "@/components/ui/card";
 import { ContributionStreaks } from "@/components/user/contro-streaks";
-import { BackButton } from "@/components/shared/back-button";
 import { DashboardSidebar } from "@/components/user/dashboard-sidebar";
 import { DashboardHeader } from "@/components/user/dashboard-header";
 import { ContributionHeatmap } from "@/components/user/contribution-heatmap";
@@ -130,9 +129,9 @@ export default async function ResultPage({ searchParams }: Props) {
 
   const formattedJoinDate = user.createdAt
     ? new Date(user.createdAt).toLocaleDateString("en-US", {
-        month: "short",
-        year: "numeric",
-      })
+      month: "short",
+      year: "numeric",
+    })
     : null;
 
   const recentlyViewed = [

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   Search,
@@ -15,23 +15,41 @@ import {
 import { DashboardSidebar } from "./dashboard-sidebar";
 
 interface DashboardHeaderProps {
-  username: string;
+  username?: string;
   userUrl?: string;
   activeTab?: string;
   recentlyViewed?: { label: string; href: string }[];
 }
 
 export function DashboardHeader({
-  username,
+  username = "",
   userUrl,
-  activeTab = "overview",
+  activeTab,
   recentlyViewed = [],
 }: DashboardHeaderProps) {
   const router = useRouter();
-  const [searchValue, setSearchValue] = useState(username);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
-  const cleanUser = username.trim().replace(/^@/, "");
+  const urlUser = searchParams?.get("username") || "";
+  const cleanUser = (username || urlUser).trim().replace(/^@/, "");
+
+  const currentTab =
+    activeTab ||
+    (pathname?.includes("/repositories")
+      ? "repos"
+      : pathname?.includes("/commits")
+        ? "commits"
+        : "overview");
+
+  const [searchValue, setSearchValue] = useState(cleanUser);
+
+  useEffect(() => {
+    if (cleanUser) {
+      setSearchValue(cleanUser);
+    }
+  }, [cleanUser]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,7 +137,7 @@ export function DashboardHeader({
       {/* Mobile Quick Navigation Tabs */}
       <div className="md:hidden flex items-center gap-1.5 px-3 py-2 border-b border-zinc-800/60 bg-[#0d0e17]/95 backdrop-blur-sm overflow-x-auto no-scrollbar z-10">
         {mobileNavItems.map(({ id, label, icon: Icon, href }) => {
-          const isActive = activeTab === id;
+          const isActive = currentTab === id;
           return (
             <Link
               key={id}
@@ -146,7 +164,7 @@ export function DashboardHeader({
           <div className="relative w-64 max-w-[80vw] h-full bg-[#0d0e17] z-10 shadow-2xl flex flex-col">
             <DashboardSidebar
               username={cleanUser}
-              activeTab={activeTab}
+              activeTab={currentTab}
               recentlyViewed={recentlyViewed}
               onItemClick={() => setMobileMenuOpen(false)}
             />

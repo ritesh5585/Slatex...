@@ -1,26 +1,18 @@
 import { DashboardHeader } from "@/components/user/dashboard-header";
+import { DashboardSidebar } from "@/components/user/dashboard-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
   return (
     <main className="h-screen overflow-hidden bg-[#08090f] text-zinc-100 antialiased flex">
-      <aside className="hidden md:flex h-full w-52 shrink-0 flex-col border-r border-zinc-800/60 bg-[#0d0e17] p-4">
-        <div className="mb-7 flex items-center gap-2.5 px-2">
-          {/* <Skeleton className="h-8 w-8 rounded-lg" />
-          <Skeleton className="h-4 w-20 rounded-md" /> */}
-        </div>
-        <div className="space-y-2">
-          {[0, 1, 2, 3].map((item) => (
-            <Skeleton key={item} className="h-9 w-full rounded-lg" />
-          ))}
-        </div>
-        <Skeleton className="mt-auto h-8 w-full rounded-lg" />
-      </aside>
+      <div className="hidden md:flex w-52 shrink-0 flex-col h-full">
+        <DashboardSidebar activeTab="overview" />
+      </div>
 
       <section className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-[#08090f]">
         <div className="hero-glow" />
         <div className="hero-grid pointer-events-none absolute inset-0 opacity-[0.06]" />
-        <DashboardHeader username="" activeTab="overview" />
+        <DashboardHeader activeTab="overview" />
 
         <div className="relative z-10 flex-1 overflow-y-auto">
           <div className="mx-auto max-w-6xl space-y-5 px-4 py-6 sm:px-6">
