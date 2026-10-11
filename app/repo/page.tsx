@@ -32,7 +32,9 @@ function parseRepoParams({ owner, repo, url }: Awaited<Props["searchParams"]>) {
   if (!url) return { owner: "", name: "" };
   try {
     const parsed = new URL(url.startsWith("http") ? url : `https://${url}`);
-    const [parsedOwner = "", parsedName = ""] = parsed.pathname.split("/").filter(Boolean);
+    const [parsedOwner = "", parsedName = ""] = parsed.pathname
+      .split("/")
+      .filter(Boolean);
     return { owner: parsedOwner, name: parsedName.replace(/\.git$/, "") };
   } catch {
     return { owner: "", name: "" };
@@ -112,11 +114,11 @@ export default async function RepoPage({ searchParams }: Props) {
       getRepoReadme(owner, name),
       fetch(
         `https://api.github.com/repos/${owner}/${name}/contributors?per_page=10`,
-        { headers, next: { revalidate: 3600 } }
+        { headers, next: { revalidate: 3600 } },
       ),
       fetch(
         `https://api.github.com/repos/${owner}/${name}/stats/commit_activity`,
-        { headers, next: { revalidate: 1800 } }
+        { headers, next: { revalidate: 1800 } },
       ),
     ]);
 
@@ -127,10 +129,14 @@ export default async function RepoPage({ searchParams }: Props) {
       activityResponse.ok ? activityResponse.json() : [],
     ]);
 
-    const contributors: GitHubContributor[] = Array.isArray(contributorData) ? contributorData : [];
-    const activity: GitHubCommitActivityWeek[] = Array.isArray(activityData) ? activityData.slice(-13) : [];
+    const contributors: GitHubContributor[] = Array.isArray(contributorData)
+      ? contributorData
+      : [];
+    const activity: GitHubCommitActivityWeek[] = Array.isArray(activityData)
+      ? activityData.slice(-13)
+      : [];
     const languages = Object.fromEntries(
-      languageEdges.map(({ node, size }) => [node.name, size])
+      languageEdges.map(({ node, size }) => [node.name, size]),
     );
 
     return (
@@ -146,9 +152,11 @@ export default async function RepoPage({ searchParams }: Props) {
         defaultBranch={repo.defaultBranchRef?.name ?? null}
       >
         <div className="px-4 sm:px-6 py-6 space-y-5 max-w-5xl mx-auto">
-
           {/* ── Overview ─────────────────────────────────────────────────── */}
-          <section id="repo-section-overview" className="space-y-5 scroll-mt-20">
+          <section
+            id="repo-section-overview"
+            className="space-y-5 scroll-mt-20"
+          >
             <RepoHeader repo={repo} />
             <RepoStats
               repo={repo}
@@ -206,7 +214,9 @@ export default async function RepoPage({ searchParams }: Props) {
                   <p className="text-sm font-medium text-zinc-200 group-hover:text-white transition-colors">
                     View all releases on GitHub
                   </p>
-                  <p className="text-xs text-zinc-500">{owner}/{name}</p>
+                  <p className="text-xs text-zinc-500">
+                    {owner}/{name}
+                  </p>
                 </div>
               </a>
             </Card>

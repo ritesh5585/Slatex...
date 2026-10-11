@@ -1,26 +1,26 @@
 export const LANGUAGE_COLORS: Record<string, string> = {
-  JavaScript: "#f7df1e",
   TypeScript: "#3178c6",
-  HTML: "#e34c26",
-  CSS: "#563d7c",
-  SCSS: "#c6538c",
-  Sass: "#a53b70",
-  Python: "#3572A5",
+  JavaScript: "#f7df1e",
+  Python: "#3572a5",
   Rust: "#dea584",
-  Go: "#00ADD8",
+  Go: "#00add8",
+  CSS: "#563d7c",
+  HTML: "#e34c26",
+  Java: "#b07219",
   "C++": "#f34b7d",
   C: "#555555",
-  "C#": "#178600",
-  Java: "#b07219",
-  Kotlin: "#A97BFF",
-  Swift: "#F05138",
-  PHP: "#4F5D95",
   Ruby: "#701516",
+  Swift: "#f05138",
+  Kotlin: "#a97bff",
+  Dart: "#00b4ab",
+  PHP: "#4f5d95",
   Shell: "#89e051",
-  Bash: "#89e051",
   Vue: "#41b883",
   Svelte: "#ff3e00",
-  Dart: "#00B4AB",
+  SCSS: "#c6538c",
+  Sass: "#a53b70",
+  "C#": "#178600",
+  Bash: "#89e051",
   Elixir: "#6e4a7e",
   Haskell: "#5e5086",
   Lua: "#000080",
@@ -57,14 +57,30 @@ export const FALLBACK_LANGUAGE_COLORS = [
   "#06b6d4", // Cyan
   "#6366f1", // Indigo
   "#14b8a6", // Teal
+  "#f43f5e", // Rose
+  "#84cc16", // Lime
+  "#a855f7", // Purple
+  "#0ea5e9", // Sky
 ];
 
 export function getLanguageColor(language: string | null | undefined): string {
-  if (!language) return "#71717a";
+  if (!language) return "#71717a"; // Zinc-500 for unknown/empty
+
+  // 1. Direct match
   if (LANGUAGE_COLORS[language]) {
     return LANGUAGE_COLORS[language];
   }
 
+  // 2. Case-insensitive match (GitHub sometimes returns "javascript" vs "JavaScript")
+  const lowerLang = language.toLowerCase();
+  const foundKey = Object.keys(LANGUAGE_COLORS).find(
+    (key) => key.toLowerCase() === lowerLang
+  );
+  if (foundKey) {
+    return LANGUAGE_COLORS[foundKey];
+  }
+
+  // 3. Deterministic hash fallback (same language always gets same color)
   let hash = 0;
   for (let i = 0; i < language.length; i++) {
     hash = language.charCodeAt(i) + ((hash << 5) - hash);

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { X, GitFork, Star, ArrowRight, Sparkles, Loader2, CheckCircle2, User } from "lucide-react";
 import Link from "next/link";
+import type { GitHubUserGQL } from "@/lib/api/github";
 
 interface OpenSourceModalProps {
   isOpen: boolean;
@@ -12,7 +13,7 @@ interface OpenSourceModalProps {
 export function OpenSourceModal({ isOpen, onClose }: OpenSourceModalProps) {
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
-  const [userProfile, setUserProfile] = useState<any | null>(null);
+  const [userProfile, setUserProfile] = useState<GitHubUserGQL | null>(null);
 
   if (!isOpen) return null;
 
@@ -128,7 +129,7 @@ export function OpenSourceModal({ isOpen, onClose }: OpenSourceModalProps) {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
                 <span>
-                  Matched with <strong>@{userProfile.login}</strong> ({userProfile.public_repos} repos)
+                  Matched with <strong>@{userProfile.login}</strong> ({userProfile.repositories.totalCount} repos)
                 </span>
               </div>
               <Link

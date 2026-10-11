@@ -2,34 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Code2 } from "lucide-react";
-
-// Language color mapping
-const LANG_COLORS: Record<string, string> = {
-  TypeScript: "#3178c6",
-  JavaScript: "#f7df1e",
-  Python: "#3572a5",
-  Rust: "#dea584",
-  Go: "#00add8",
-  CSS: "#563d7c",
-  HTML: "#e34c26",
-  Java: "#b07219",
-  "C++": "#f34b7d",
-  C: "#555555",
-  Ruby: "#701516",
-  Swift: "#f05138",
-  Kotlin: "#a97bff",
-  Dart: "#00b4ab",
-  PHP: "#4f5d95",
-  Shell: "#89e051",
-  Vue: "#41b883",
-  Svelte: "#ff3e00",
-};
-
-function getLangColor(name: string, idx: number): string {
-  if (LANG_COLORS[name]) return LANG_COLORS[name];
-  const fallbacks = ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#06b6d4"];
-  return fallbacks[idx % fallbacks.length];
-}
+import { getLanguageColor as getLangColor } from "@/lib/language-colors";
 
 interface Props {
   languages: Record<string, number>;
@@ -55,7 +28,7 @@ export function LanguagePie({ languages }: Props) {
       name,
       bytes,
       pct: ((bytes / total) * 100).toFixed(1),
-      color: getLangColor(name, idx),
+      color: getLangColor(name),
     }));
 
   return (
