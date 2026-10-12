@@ -3,14 +3,18 @@ import { headers } from "next/headers";
 import { redis } from "./redis";
 import { ClientRateLimitError } from "./api/with-github-errors";
 
-const limiter = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(60, "1 h"),
-  prefix: "rl:gh-miss",
-  analytics: false,
-});
+const limiter = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(60, "1 h"),
+      prefix: "rl:gh-miss",
+      analytics: false,
+    })
+  : null;
 
 export async function enforceLimit() {
+  if (!limiter) return;
+
   const h = await headers();
   const id =
     h.get("x-forwarded-for")?.split(",")[0]?.trim() ??
