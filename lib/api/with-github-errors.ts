@@ -94,3 +94,10 @@ export function withGithubErrors<
     }
   }) as T;
 }
+
+export class ClientRateLimitError extends GitHubGraphQLError {
+  constructor(public readonly retryAfter: number) {
+    super(`Too many lookups. Try again in ${retryAfter}s`, 429);
+    this.name = "ClientRateLimitError";
+  }
+}

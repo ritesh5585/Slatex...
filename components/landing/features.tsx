@@ -57,7 +57,7 @@ export function Features({
     {
       id: "compare",
       title: "Compare developers",
-      badge: "Beta",
+      badge: "Live",
       description:
         "Put two profiles next to each other: skills, activity and best work.",
       tags: ["Skills", "Graphs", "Top repos"],

@@ -102,7 +102,7 @@ export function DashboardSidebar({
       id: "compare",
       label: "Compare",
       icon: GitCompare,
-      badge: "Beta",
+      badge: "Live",
       href: cleanUser
         ? `/compare?user1=${encodeURIComponent(cleanUser)}`
         : "/compare",
