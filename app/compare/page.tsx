@@ -292,6 +292,23 @@ export default async function ComparePage({ searchParams }: Props) {
         <div className="hero-glow" />
         <div className="hero-grid absolute inset-0 opacity-[0.06] pointer-events-none" />
 
+        {/* Mobile Fixed Top Bar */}
+        <header className="md:hidden sticky top-0 z-30 shrink-0 h-14 bg-[#08090f]/90 backdrop-blur-md border-b border-zinc-800/60 px-4 flex items-center justify-between">
+          <Link
+            href="/"
+            className="text-sm font-bold tracking-tight text-white flex items-center gap-2"
+          >
+            <span className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+            Slatex
+          </Link>
+          <Link
+            href="/"
+            className="text-xs text-zinc-400 hover:text-white px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 transition-colors"
+          >
+            Home
+          </Link>
+        </header>
+
         <div className="relative z-10 flex-1 overflow-y-auto px-4 sm:px-8 py-6 max-w-5xl mx-auto w-full space-y-7">
           {/* Header Title */}
           <div className="space-y-1">

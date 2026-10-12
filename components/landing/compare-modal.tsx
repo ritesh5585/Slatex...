@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, ArrowRight, GitCompare, Sparkles, Loader2, User } from "lucide-react";
-import Link from "next/link";
+import { X, ArrowRight, GitCompare, Sparkles, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface CompareModalProps {
@@ -27,14 +26,12 @@ export function CompareModal({ isOpen, onClose }: CompareModalProps) {
   const clean1 = dev1.trim().replace(/^@/, "");
   const clean2 = dev2.trim().replace(/^@/, "");
 
-  // Direct navigation to the new compare page
   const handleCompareNow = () => {
     if (!clean1 || !clean2) return;
     onClose();
     router.push(`/compare?user1=${encodeURIComponent(clean1)}&user2=${encodeURIComponent(clean2)}`);
   };
 
-  // Preview using GraphQL API route
   const handleFetchPreview = async () => {
     if (!clean1 || !clean2) return;
     setLoading(true);
@@ -42,7 +39,7 @@ export function CompareModal({ isOpen, onClose }: CompareModalProps) {
 
     try {
       const res = await fetch(
-        `/api/github/compare?user1=${encodeURIComponent(clean1)}&user2=${encodeURIComponent(clean2)}`,
+        `/api/github/compare?user1=${encodeURIComponent(clean1)}&user2=${encodeURIComponent(clean2)}`
       );
       const json = await res.json();
 
@@ -58,124 +55,115 @@ export function CompareModal({ isOpen, onClose }: CompareModalProps) {
     }
   };
 
-  const handlePreset = (u1: string, u2: string) => {
-    setDev1(u1);
-    setDev2(u2);
-    setError(null);
-  };
+  const presets = [
+    { label: "ritesh5585 vs ateekshsoni", u1: "ritesh5585", u2: "ateekshsoni" },
+    { label: "callmegautam vs ankurdotio", u1: "callmegautam", u2: "ankurdotio" },
+    { label: "torvalds vs antirez", u1: "torvalds", u2: "antirez" },
+  ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl rounded-2xl border border-zinc-800 bg-[#0d0f17] p-6 sm:p-8 shadow-2xl text-left overflow-y-auto max-h-[90vh] ring-1 ring-white/10">
-        {/* Close Button */}
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute top-5 right-5 text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer"
-        >
-          <X className="w-5 h-5" />
-        </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
+      <div className="relative w-full max-w-lg rounded-2xl border border-zinc-800 bg-[#0d0f17] p-4 sm:p-6 shadow-2xl text-left max-h-[90vh] overflow-y-auto">
+        {/* Header - Flex row prevents ANY overlap between badge and close button */}
+        <div className="flex items-start justify-between gap-3 pb-3 border-b border-zinc-800/80">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
+              <GitCompare className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                  Compare developers
+                </h3>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 font-semibold">
+                  GraphQL
+                </span>
+              </div>
+              <p className="text-xs text-zinc-400">
+                Compare two developers side by side.
+              </p>
+            </div>
+          </div>
 
-        {/* Modal Header */}
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-            <GitCompare className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              Compare developers
-              <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 font-medium">
-                GraphQL Powered
-              </span>
-            </h3>
-            <p className="text-xs sm:text-sm text-zinc-400">
-              Put two GitHub profiles side-by-side to compare stats, languages & impact.
-            </p>
-          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors shrink-0 cursor-pointer"
+            aria-label="Close dialog"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Comparison Inputs */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
           <div>
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
+            <label className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-1">
               Developer 1
             </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={dev1}
-                onChange={(e) => setDev1(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && clean1 && clean2) handleCompareNow();
-                }}
-                placeholder="e.g. ritesh5585"
-                className="w-full rounded-xl border border-zinc-800 bg-[#121522] px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/50 transition-colors"
-              />
-            </div>
+            <input
+              type="text"
+              value={dev1}
+              onChange={(e) => setDev1(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && clean1 && clean2) handleCompareNow();
+              }}
+              placeholder="e.g. ritesh5585"
+              className="w-full rounded-xl border border-zinc-800 bg-[#121522] px-3 py-2 text-xs sm:text-sm text-white placeholder-zinc-500 outline-none focus:border-indigo-500/60 transition-colors"
+            />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
+            <label className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-1">
               Developer 2
             </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={dev2}
-                onChange={(e) => setDev2(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && clean1 && clean2) handleCompareNow();
-                }}
-                placeholder="e.g ateeksh soni"
-                className="w-full rounded-xl border border-zinc-800 bg-[#121522] px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/50 transition-colors"
-              />
-            </div>
+            <input
+              type="text"
+              value={dev2}
+              onChange={(e) => setDev2(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && clean1 && clean2) handleCompareNow();
+              }}
+              placeholder="e.g. ateekshsoni"
+              className="w-full rounded-xl border border-zinc-800 bg-[#121522] px-3 py-2 text-xs sm:text-sm text-white placeholder-zinc-500 outline-none focus:border-indigo-500/60 transition-colors"
+            />
           </div>
         </div>
 
-        {/* Quick Presets */}
-        <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-zinc-500">
-          <span>Presets:</span>
-          <button
-            type="button"
-            onClick={() => handlePreset("ritesh5585", "ateekshsoni")}
-            className="text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
-          >
-            ritesh5585 vs ateekshsoni
-          </button>
-          <span>•</span>
-          <button
-            type="button"
-            onClick={() => handlePreset("callmegautam", "ankurdotio")}
-            className="text-zinc-400 hover:text-white underline cursor-pointer"
-          >
-            Gautam Sutar vs Ankur Prajapati
-          </button>
-          <span>•</span>
-          <button
-            type="button"
-            onClick={() => handlePreset("torvalds", "antirez")}
-            className="text-zinc-400 hover:text-white underline cursor-pointer"
-          >
-            torvalds vs antirez
-          </button>
+        {/* Presets as clean pills */}
+        <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-2">
+          <span className="text-[11px] text-zinc-500 font-medium">Presets:</span>
+          {presets.map((p) => (
+            <button
+              key={p.label}
+              type="button"
+              onClick={() => {
+                setDev1(p.u1);
+                setDev2(p.u2);
+                setError(null);
+              }}
+              className="px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 text-[10px] font-mono transition-colors cursor-pointer"
+            >
+              {p.label}
+            </button>
+          ))}
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-6 flex flex-wrap items-center justify-end gap-3 pt-3 border-t border-zinc-800/80">
+        <div className="mt-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-3 border-t border-zinc-800/80">
           <button
             type="button"
             onClick={handleFetchPreview}
             disabled={loading || !clean1 || !clean2}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-700 bg-zinc-800/60 hover:bg-zinc-800 hover:text-white disabled:opacity-50 text-zinc-300 text-sm font-medium transition-all cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-800/60 hover:bg-zinc-800 disabled:opacity-50 text-zinc-300 text-xs font-medium transition-all cursor-pointer"
           >
             {loading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Querying GraphQL...
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Querying...
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4 text-purple-400" />
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
                 Quick Preview
               </>
             )}
@@ -185,117 +173,34 @@ export function CompareModal({ isOpen, onClose }: CompareModalProps) {
             type="button"
             onClick={handleCompareNow}
             disabled={!clean1 || !clean2}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white text-sm font-semibold transition-all cursor-pointer shadow-lg shadow-indigo-600/30 active:scale-95"
+            className="inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold transition-all cursor-pointer active:scale-95 shadow-md shadow-indigo-600/30"
           >
-            <GitCompare className="w-4 h-4" />
-            Compare Now
-            <ArrowRight className="w-4 h-4" />
+            <GitCompare className="w-3.5 h-3.5" />
+            <span>Compare Now</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        {/* Error message */}
+        {/* Error */}
         {error && (
-          <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
+          <div className="mt-3 p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
             {error}
           </div>
         )}
 
-        {/* Comparison Data Preview */}
+        {/* Preview Results if loaded */}
         {comparisonData && (
-          <div className="mt-6 pt-5 border-t border-zinc-800/80 space-y-4">
+          <div className="mt-4 p-3 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-2 text-xs">
+            <div className="flex justify-between items-center font-bold text-white">
+              <span>{comparisonData.user1?.login}</span>
+              <span className="text-zinc-500">VS</span>
+              <span>{comparisonData.user2?.login}</span>
+            </div>
             {comparisonData.verdict && (
-              <p className="text-xs text-indigo-300 bg-indigo-950/40 border border-indigo-800/50 p-2.5 rounded-xl text-center">
+              <p className="text-zinc-400 text-[11px] leading-relaxed">
                 {comparisonData.verdict}
               </p>
             )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Dev 1 Card */}
-              <div className="rounded-xl border border-indigo-900/40 bg-[#121522] p-4 text-center ring-1 ring-indigo-500/20">
-                <div className="w-12 h-12 rounded-full overflow-hidden mx-auto bg-zinc-800 mb-2 ring-2 ring-indigo-500/40">
-                  {comparisonData.user1.avatarUrl ? (
-                    <img
-                      src={comparisonData.user1.avatarUrl}
-                      alt={comparisonData.user1.login}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <User className="w-6 h-6 m-3 text-zinc-500" />
-                  )}
-                </div>
-                <h4 className="font-bold text-white text-base">
-                  {comparisonData.user1.name || comparisonData.user1.login}
-                </h4>
-                <p className="text-xs text-indigo-400">@{comparisonData.user1.login}</p>
-                <div className="mt-3 grid grid-cols-2 gap-2 text-left text-xs">
-                  <div className="p-2 rounded bg-zinc-900/60 border border-zinc-800/60">
-                    <div className="text-zinc-500 text-[11px]">Followers</div>
-                    <div className="font-bold text-white text-sm">
-                      {typeof comparisonData.user1.followers === "number"
-                        ? comparisonData.user1.followers.toLocaleString()
-                        : comparisonData.user1.followers?.totalCount?.toLocaleString?.() || 0}
-                    </div>
-                  </div>
-                  <div className="p-2 rounded bg-zinc-900/60 border border-zinc-800/60">
-                    <div className="text-zinc-500 text-[11px]">Public Repos</div>
-                    <div className="font-bold text-white text-sm">
-                      {typeof comparisonData.user1.publicRepos === "number"
-                        ? comparisonData.user1.publicRepos.toLocaleString()
-                        : comparisonData.user1.publicRepos?.totalCount?.toLocaleString?.() || 0}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Dev 2 Card */}
-              <div className="rounded-xl border border-amber-900/40 bg-[#121522] p-4 text-center ring-1 ring-amber-500/20">
-                <div className="w-12 h-12 rounded-full overflow-hidden mx-auto bg-zinc-800 mb-2 ring-2 ring-amber-500/40">
-                  {comparisonData.user2.avatarUrl ? (
-                    <img
-                      src={comparisonData.user2.avatarUrl}
-                      alt={comparisonData.user2.login}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <User className="w-6 h-6 m-3 text-zinc-500" />
-                  )}
-                </div>
-                <h4 className="font-bold text-white text-base">
-                  {comparisonData.user2.name || comparisonData.user2.login}
-                </h4>
-                <p className="text-xs text-amber-400">@{comparisonData.user2.login}</p>
-                <div className="mt-3 grid grid-cols-2 gap-2 text-left text-xs">
-                  <div className="p-2 rounded bg-zinc-900/60 border border-zinc-800/60">
-                    <div className="text-zinc-500 text-[11px]">Followers</div>
-                    <div className="font-bold text-white text-sm">
-                      {typeof comparisonData.user2.followers === "number"
-                        ? comparisonData.user2.followers.toLocaleString()
-                        : comparisonData.user2.followers?.totalCount?.toLocaleString?.() || 0}
-                    </div>
-                  </div>
-                  <div className="p-2 rounded bg-zinc-900/60 border border-zinc-800/60">
-                    <div className="text-zinc-500 text-[11px]">Public Repos</div>
-                    <div className="font-bold text-white text-sm">
-                      {typeof comparisonData.user2.publicRepos === "number"
-                        ? comparisonData.user2.publicRepos.toLocaleString()
-                        : comparisonData.user2.publicRepos?.totalCount?.toLocaleString?.() || 0}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Launch Full View Button */}
-            <div className="pt-2 flex justify-center">
-              <button
-                type="button"
-                onClick={handleCompareNow}
-                className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
-              >
-                <span>Open Full Comparison Page</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
           </div>
         )}
       </div>

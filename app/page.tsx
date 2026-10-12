@@ -4,7 +4,11 @@ import React, { useRef, useState } from "react";
 import {
   Navbar,
   Hero,
+  Showcase,
   Features,
+  Capabilities,
+  HowItWorks,
+  Faq,
   CtaBanner,
   Footer,
   CompareModal,
@@ -22,32 +26,45 @@ export default function Home() {
   const [isOpenSourceOpen, setIsOpenSourceOpen] = useState(false);
   const [isProfilePromptOpen, setIsProfilePromptOpen] = useState(false);
 
-  // Focus search input on Get Started or Explore click
   const handleFocusSearch = () => {
     if (searchInputRef.current) {
-      searchInputRef.current.focus();
       searchInputRef.current.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 250);
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleSelectUser = (username: string) => {
+    if (searchInputRef.current) {
+      searchInputRef.current.value = username;
+      const event = new Event("input", { bubbles: true });
+      searchInputRef.current.dispatchEvent(event);
+      handleFocusSearch();
     }
   };
 
   return (
-    <main className="relative min-h-screen bg-[#08090f] text-zinc-100 flex flex-col justify-between overflow-x-hidden selection:bg-indigo-500/30 selection:text-indigo-200">
-      {/* Background ambient lighting */}
-      <div className="hero-glow" />
-      <div className="hero-grid absolute inset-0 opacity-[0.06] pointer-events-none" />
-
-      {/* Top Navbar: only Get Started button as instructed */}
+    <main className="relative min-h-screen bg-[#08090f] text-zinc-100 flex flex-col justify-between overflow-x-hidden selection:bg-indigo-500/30 selection:text-indigo-200 pt-14">
+      {/* Fixed top navbar with Get started button */}
       <Navbar onGetStarted={handleFocusSearch} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col items-center w-full z-10">
-        {/* Hero Section */}
+      <div className="flex-1 flex flex-col items-center w-full">
+        {/* Search Hero */}
         <Hero searchInputRef={searchInputRef} />
 
-        {/* Feature Cards Section: Everything starts with a username */}
+        {/* Live Interactive Preview */}
+        <div id="showcase" className="w-full">
+          <Showcase onSelectUser={handleSelectUser} />
+        </div>
+
+        {/* 4 Core Platform Tools */}
         <Features
           onExploreClick={handleFocusSearch}
           onCompareClick={() => setIsCompareOpen(true)}
@@ -55,14 +72,23 @@ export default function Home() {
           onYouTubeClick={() => setIsYouTubeOpen(true)}
         />
 
-        {/* Purple CTA Banner: See your own GitHub story */}
+        {/* 3-Step Workflow */}
+        <HowItWorks />
+
+        {/* Core Capabilities */}
+        <Capabilities />
+
+        {/* FAQ Accordion */}
+        <Faq />
+
+        {/* CTA Banner */}
         <CtaBanner onAnalyzeProfile={() => setIsProfilePromptOpen(true)} />
       </div>
 
       {/* Footer */}
       <Footer />
 
-      {/* Interactive Feature Modals */}
+      {/* Feature Modals */}
       <CompareModal
         isOpen={isCompareOpen}
         onClose={() => setIsCompareOpen(false)}

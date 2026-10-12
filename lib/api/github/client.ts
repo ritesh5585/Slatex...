@@ -21,7 +21,7 @@ export async function githubGraphQL<T>(
 
   if (!token) {
     throw new AuthError(
-      "GITHUB_TOKEN missing — GraphQL API hamesha auth maangta hai",
+      "GITHUB_TOKEN missing — please set it in your environment variables",
     );
   }
 
