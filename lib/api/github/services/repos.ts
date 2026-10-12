@@ -4,6 +4,8 @@ import {
   GET_REPO_LANGUAGES_QUERY,
 } from "../queries/repo.query";
 import { NotFoundError } from "@/lib/api/with-github-errors";
+import { cached } from "@/lib/cache";
+import { enforceLimit } from "@/lib/rate-limiter";
 import type { GitHubRepoGQL } from "../types";
 
 interface RepoResponse {
@@ -18,26 +20,27 @@ interface LanguagesResponse {
   } | null;
 }
 
-export async function getRepo(
-  owner: string,
-  name: string,
-): Promise<GitHubRepoGQL> {
-  const data = await githubGraphQL<RepoResponse>(GET_REPO_QUERY, {
-    owner,
-    name,
+export const getRepo = (owner: string, name: string): Promise<GitHubRepoGQL> =>
+  cached(`gh:v1:repo:${owner}/${name}`.toLowerCase(), 600, async () => {
+    await enforceLimit();
+    const data = await githubGraphQL<RepoResponse>(GET_REPO_QUERY, {
+      owner,
+      name,
+    });
+    if (!data.repository)
+      throw new NotFoundError(`Repository "${owner}/${name}"`);
+    return data.repository;
   });
-  if (!data.repository)
-    throw new NotFoundError(`Repository "${owner}/${name}"`);
-  return data.repository;
-}
 
-export async function getRepoLanguages(
+export const getRepoLanguages = (
   owner: string,
   name: string,
-): Promise<{ size: number; node: { name: string; color: string } }[]> {
-  const data = await githubGraphQL<LanguagesResponse>(
-    GET_REPO_LANGUAGES_QUERY,
-    { owner, name },
-  );
-  return data.repository?.languages.edges ?? [];
-}
+): Promise<{ size: number; node: { name: string; color: string } }[]> =>
+  cached(`gh:v1:repo-langs:${owner}/${name}`.toLowerCase(), 1800, async () => {
+    await enforceLimit();
+    const data = await githubGraphQL<LanguagesResponse>(
+      GET_REPO_LANGUAGES_QUERY,
+      { owner, name },
+    );
+    return data.repository?.languages.edges ?? [];
+  });

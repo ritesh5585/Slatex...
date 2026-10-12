@@ -6,7 +6,7 @@ import { ClientRateLimitError } from "./api/with-github-errors";
 const limiter = redis
   ? new Ratelimit({
       redis,
-      limiter: Ratelimit.slidingWindow(60, "1 h"),
+      limiter: Ratelimit.slidingWindow(20, "1 h"),
       prefix: "rl:gh-miss",
       analytics: false,
     })

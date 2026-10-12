@@ -20,7 +20,8 @@ import {
 } from "@/lib/api/github/services/compare";
 import { MonthlyContributionChart } from "@/components/compare/monthly-chart";
 import { CompareSearchBar } from "@/components/compare/compare-search-bar";
-import { GitHubGraphQLError } from "@/lib/api/github";
+import { GitHubGraphQLError, ClientRateLimitError } from "@/lib/api/github";
+import { RateLimited } from "@/components/shared/rate-limited";
 
 interface Props {
   searchParams: Promise<{ user1?: string; user2?: string }>;
@@ -244,6 +245,10 @@ export default async function ComparePage({ searchParams }: Props) {
   try {
     comparisonData = await compareGitHubUsers(user1, user2);
   } catch (err: any) {
+    if (err instanceof ClientRateLimitError) {
+      return <RateLimited retryAfter={err.retryAfter} />;
+    }
+
     const message =
       err instanceof GitHubGraphQLError
         ? err.message

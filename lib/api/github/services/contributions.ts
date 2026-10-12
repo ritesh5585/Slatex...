@@ -4,6 +4,8 @@ import {
   GET_USER_COMMIT_CONTRIBUTIONS_QUERY,
 } from "../queries/contributions.query";
 import { NotFoundError } from "@/lib/api/with-github-errors";
+import { cached } from "@/lib/cache";
+import { enforceLimit } from "@/lib/rate-limiter";
 import type {
   ContributionCalendar,
   RepoCommitContribution,
@@ -27,35 +29,39 @@ interface CommitContributionsResponse {
   } | null;
 }
 
-export async function getUserContributions(username: string) {
-  const data = await githubGraphQL<ContributionsResponse>(
-    GET_CONTRIBUTIONS_QUERY,
-    { username },
-  );
-  if (!data.user) throw new NotFoundError(`User "${username}"`);
-  const calendar = data.user.contributionsCollection.contributionCalendar;
-  return {
-    totalContributions: calendar.totalContributions,
-    contributions: calendar.weeks.flatMap((w) => w.contributionDays),
-  };
-}
+export const getUserContributions = (username: string) =>
+  cached(`gh:v1:contrib:${username.toLowerCase()}`, 3600, async () => {
+    await enforceLimit();
+    const data = await githubGraphQL<ContributionsResponse>(
+      GET_CONTRIBUTIONS_QUERY,
+      { username },
+    );
+    if (!data.user) throw new NotFoundError(`User "${username}"`);
+    const calendar = data.user.contributionsCollection.contributionCalendar;
+    return {
+      totalContributions: calendar.totalContributions,
+      contributions: calendar.weeks.flatMap((w) => w.contributionDays),
+    };
+  });
 
-export async function getUserCommitActivity(
+export const getUserCommitActivity = (
   username: string,
-): Promise<UserCommitActivity> {
-  const data = await githubGraphQL<CommitContributionsResponse>(
-    GET_USER_COMMIT_CONTRIBUTIONS_QUERY,
-    { username },
-  );
-  if (!data.user) throw new NotFoundError(`User "${username}"`);
-  const collection = data.user.contributionsCollection;
-  const calendar = collection.contributionCalendar;
-  return {
-    totalCommitContributions: collection.totalCommitContributions,
-    totalRepositoriesWithContributedCommits:
-      collection.totalRepositoriesWithContributedCommits,
-    totalContributions: calendar.totalContributions,
-    contributions: calendar.weeks.flatMap((w) => w.contributionDays),
-    repoCommitContributions: collection.commitContributionsByRepository || [],
-  };
-}
+): Promise<UserCommitActivity> =>
+  cached(`gh:v1:commit-activity:${username.toLowerCase()}`, 3600, async () => {
+    await enforceLimit();
+    const data = await githubGraphQL<CommitContributionsResponse>(
+      GET_USER_COMMIT_CONTRIBUTIONS_QUERY,
+      { username },
+    );
+    if (!data.user) throw new NotFoundError(`User "${username}"`);
+    const collection = data.user.contributionsCollection;
+    const calendar = collection.contributionCalendar;
+    return {
+      totalCommitContributions: collection.totalCommitContributions,
+      totalRepositoriesWithContributedCommits:
+        collection.totalRepositoriesWithContributedCommits,
+      totalContributions: calendar.totalContributions,
+      contributions: calendar.weeks.flatMap((w) => w.contributionDays),
+      repoCommitContributions: collection.commitContributionsByRepository || [],
+    };
+  });

@@ -17,7 +17,9 @@ import {
   getRepoReadme,
   NotFoundError,
   RateLimitError,
+  ClientRateLimitError,
 } from "@/lib/api/github";
+import { RateLimited } from "@/components/shared/rate-limited";
 import type {
   GitHubCommitActivityWeek,
   GitHubContributor,
@@ -88,8 +90,6 @@ export default async function RepoPage({ searchParams }: Props) {
         { headers, next: { revalidate: 1800 } },
       ),
     ]);
-
-    console.log("Repo:", repo);
 
     const [contributorData, activityData] = await Promise.all([
       contributorsResponse.ok ? contributorsResponse.json() : [],
@@ -216,6 +216,9 @@ export default async function RepoPage({ searchParams }: Props) {
           description={`${owner}/${name} is private or does not exist.`}
         />
       );
+    }
+    if (error instanceof ClientRateLimitError) {
+      return <RateLimited retryAfter={error.retryAfter} />;
     }
     if (error instanceof RateLimitError) {
       return (

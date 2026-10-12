@@ -16,7 +16,9 @@ import {
   getUserContributions,
   NotFoundError,
   RateLimitError,
+  ClientRateLimitError,
 } from "@/lib/api/github";
+import { RateLimited } from "@/components/shared/rate-limited";
 
 interface Props {
   searchParams: Promise<{ username?: string }>;
@@ -67,6 +69,9 @@ export default async function ResultPage({ searchParams }: Props) {
           }
         />
       );
+    }
+    if (err instanceof ClientRateLimitError) {
+      return <RateLimited retryAfter={err.retryAfter} />;
     }
     if (err instanceof RateLimitError) {
       return (

@@ -62,5 +62,17 @@ export async function githubGraphQL<T>(
   if (!json.data)
     throw new GitHubGraphQLError("Empty response from GitHub", 500);
 
+  const rl = (json.data as { rateLimit?: { cost: number; remaining: number } })
+    .rateLimit;
+  if (rl) {
+    console.log(
+      JSON.stringify({
+        evt: "gh_cost",
+        cost: rl.cost,
+        remaining: rl.remaining,
+      }),
+    );
+  }
+
   return json.data;
 }

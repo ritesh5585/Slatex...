@@ -1,5 +1,7 @@
 import { githubGraphQL } from "../client";
 import { GET_COMMIT_HISTORY_QUERY } from "../queries/commits.query";
+import { cached } from "@/lib/cache";
+import { enforceLimit } from "@/lib/rate-limiter";
 import type { CommitNode } from "../types";
 
 interface CommitHistoryResponse {
@@ -12,25 +14,33 @@ interface CommitHistoryResponse {
   } | null;
 }
 
-export async function getCommitHistory(
+export const getCommitHistory = (
   owner: string,
   name: string,
-  first: number = 100, 
+  first: number = 100,
   since?: string,
-) {
-  const data = await githubGraphQL<CommitHistoryResponse>(
-    GET_COMMIT_HISTORY_QUERY,
-    {
-      owner,
-      name,
-      first,
-      since: since ?? null,
+) =>
+  cached(
+    `gh:v1:commits:${owner}/${name}:${first}:${since ?? "all"}`.toLowerCase(),
+    300,
+    async () => {
+      await enforceLimit();
+      const data = await githubGraphQL<CommitHistoryResponse>(
+        GET_COMMIT_HISTORY_QUERY,
+        {
+          owner,
+          name,
+          first,
+          since: since ?? null,
+        },
+      );
+      const edges =
+        data.repository?.defaultBranchRef?.target?.history.edges ?? [];
+      return edges.map((e) => e.node);
     },
   );
-  const edges = data.repository?.defaultBranchRef?.target?.history.edges ?? [];
-  return edges.map((e) => e.node);
-}
 
+// Pure function — no caching needed
 export function aggregateCommitsByDay(commits: CommitNode[]) {
   const daily = new Map<
     string,

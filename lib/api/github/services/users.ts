@@ -25,14 +25,17 @@ export const getUserByUsername = (username: string) =>
     return data.user;
   });
 
-export async function getUserRepos(
-  username: string,
-  first: number = 100,
-): Promise<GitHubUserRepoGQL[]> {
-  const data = await githubGraphQL<UserReposResponse>(GET_USER_REPOS_QUERY, {
-    username,
-    first,
-  });
-  if (!data.user) throw new NotFoundError(`User "${username}"`);
-  return data.user.repositories.nodes;
-}
+export const getUserRepos = (username: string, first: number = 100) =>
+  cached(
+    `gh:v1:user-repos:${username.toLowerCase()}:${first}`,
+    600,
+    async () => {
+      await enforceLimit();
+      const data = await githubGraphQL<UserReposResponse>(
+        GET_USER_REPOS_QUERY,
+        { username, first },
+      );
+      if (!data.user) throw new NotFoundError(`User "${username}"`);
+      return data.user.repositories.nodes;
+    },
+  );

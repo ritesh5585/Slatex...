@@ -2,6 +2,8 @@ import { githubGraphQL } from "../client";
 import { COMPARE_QUERY } from "../queries/compare.query";
 import { GitHubAPIError, NotFoundError } from "@/lib/api/with-github-errors";
 import { getLanguageColor } from "@/lib/language-colors";
+import { cached } from "@/lib/cache";
+import { enforceLimit } from "@/lib/rate-limiter";
 import type {
   ComparedUser,
   MonthlyPoint,
@@ -326,41 +328,46 @@ function generateAnalysis(
   };
 }
 
-export async function compareGitHubUsers(
+export const compareGitHubUsers = (
   username1: string,
   username2: string,
-): Promise<ComparisonResult> {
-  const u1 = username1.trim().replace(/^@/, "");
-  const u2 = username2.trim().replace(/^@/, "");
+): Promise<ComparisonResult> => {
+  const u1 = username1.trim().replace(/^@/, "").toLowerCase();
+  const u2 = username2.trim().replace(/^@/, "").toLowerCase();
 
   if (!u1 || !u2) {
-    throw new GitHubAPIError("Both usernames are required to perform a comparison", 400);
+    throw new GitHubAPIError(
+      "Both usernames are required to perform a comparison",
+      400,
+    );
   }
 
-  const raw = await githubGraphQL<{
-    user1: RawUserNode | null;
-    user2: RawUserNode | null;
-  }>(COMPARE_QUERY, { u1, u2 });
+  // Sort keys so compare(a,b) and compare(b,a) share the same cache entry
+  const [ka, kb] = [u1, u2].sort();
+  const cacheKey = `gh:v1:compare:${ka}:${kb}`;
 
-  if (!raw.user1 && !raw.user2) {
-    throw new NotFoundError(`Neither "${u1}" nor "${u2}"`);
-  }
-  if (!raw.user1) {
-    throw new NotFoundError(`User "${u1}"`);
-  }
-  if (!raw.user2) {
-    throw new NotFoundError(`User "${u2}"`);
-  }
+  return cached(cacheKey, 900, async () => {
+    await enforceLimit();
+    const raw = await githubGraphQL<{
+      user1: RawUserNode | null;
+      user2: RawUserNode | null;
+    }>(COMPARE_QUERY, { u1, u2 });
 
-  const user1 = normalize(raw.user1);
-  const user2 = normalize(raw.user2);
-  const monthlyData = computeMonthly(raw.user1, raw.user2);
-  const insight = generateAnalysis(user1, user2);
+    if (!raw.user1 && !raw.user2) {
+      throw new NotFoundError(`Neither "${u1}" nor "${u2}"`);
+    }
+    if (!raw.user1) {
+      throw new NotFoundError(`User "${u1}"`);
+    }
+    if (!raw.user2) {
+      throw new NotFoundError(`User "${u2}"`);
+    }
 
-  return {
-    user1,
-    user2,
-    monthlyData,
-    insight,
-  };
-}
+    const user1 = normalize(raw.user1);
+    const user2 = normalize(raw.user2);
+    const monthlyData = computeMonthly(raw.user1, raw.user2);
+    const insight = generateAnalysis(user1, user2);
+
+    return { user1, user2, monthlyData, insight };
+  });
+};
