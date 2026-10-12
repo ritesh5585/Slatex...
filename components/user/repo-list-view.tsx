@@ -37,7 +37,7 @@ export function RepoListView({
 
   // Filter and sort repos
   const filteredRepos = useMemo(() => {
-    let result = repos.filter((repo) => {
+    const result = repos.filter((repo) => {
       const matchesSearch =
         searchQuery === "" ||
         repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

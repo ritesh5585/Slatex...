@@ -44,7 +44,7 @@ export function ContributionHeatmap({ contributions }: HeatmapProps) {
     const weeks: { date: string; count: number }[][] = [];
     const monthLabels: { month: string; col: number }[] = [];
 
-    let current = new Date(startDate);
+    const current = new Date(startDate);
     let weekIndex = 0;
     let lastMonth = -1;
 

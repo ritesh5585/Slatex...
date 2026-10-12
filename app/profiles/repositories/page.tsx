@@ -143,31 +143,31 @@ export default async function UserReposPage({ searchParams }: Props) {
         {/* Scrollable Container */}
         <div className="relative z-10 flex-1 overflow-y-auto">
           <div className="px-4 sm:px-6 py-6 space-y-6 max-w-6xl mx-auto">
-            {/* Page Header Card */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 backdrop-blur-md">
-              <div className="flex items-center gap-3.5">
+            {/* Page Header Card - Mobile-First Responsive */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 backdrop-blur-md">
+              <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
                 <Link
                   href={`/profiles?username=${encodeURIComponent(cleanUsername)}`}
-                  className="relative group shrink-0"
+                  className="relative group shrink-0 mt-0.5 sm:mt-0"
                 >
                   <img
                     src={user.avatarUrl}
                     alt={user.name || user.login}
-                    className="h-12 w-12 rounded-full ring-2 ring-zinc-700 shadow-md group-hover:ring-indigo-500 transition-all"
+                    className="h-11 w-11 sm:h-12 sm:w-12 rounded-full ring-2 ring-zinc-700 shadow-md group-hover:ring-indigo-500 transition-all"
                   />
                   <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-500 border-2 border-zinc-900" />
                 </Link>
 
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h1 className="text-lg sm:text-2xl font-bold text-white tracking-tight">
                       All Repositories
                     </h1>
-                    <span className="rounded-full bg-indigo-500/20 border border-indigo-500/30 px-2 py-0.5 text-xs font-semibold text-indigo-400">
+                    <span className="rounded-full bg-indigo-500/20 border border-indigo-500/30 px-2 py-0.5 text-xs font-semibold text-indigo-400 shrink-0">
                       {user.repositories.totalCount}
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-400 mt-0.5 flex items-center gap-2">
+                  <div className="text-xs text-zinc-400 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                     <span>
                       Created by{" "}
                       <strong className="text-zinc-200">@{user.login}</strong>
@@ -182,12 +182,12 @@ export default async function UserReposPage({ searchParams }: Props) {
                       <GitFork className="h-3 w-3 text-zinc-400" />{" "}
                       {totalForks.toLocaleString()} forks
                     </span>
-                  </p>
+                  </div>
                 </div>
               </div>
 
               {/* Navigation Back Button */}
-              <div className="flex items-center gap-2 self-start sm:self-auto">
+              <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
                 <Link
                   href={`/profiles?username=${encodeURIComponent(cleanUsername)}`}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-800 bg-[#0e111c] text-xs font-medium text-zinc-300 hover:text-white hover:border-zinc-700 hover:bg-[#141829] transition-all cursor-pointer shadow-sm active:scale-95"

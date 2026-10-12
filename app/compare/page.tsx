@@ -45,30 +45,52 @@ function StatRow({
   const max = Math.max(v1, v2, 1);
   const p1 = Math.round((v1 / max) * 100);
   const p2 = Math.round((v2 / max) * 100);
+  const isV1Winner = v1 > v2;
+  const isV2Winner = v2 > v1;
 
   return (
-    <div className="grid grid-cols-[60px_1fr_auto_1fr_60px] sm:grid-cols-[80px_1fr_130px_1fr_80px] items-center gap-2 sm:gap-3 py-2 text-xs sm:text-sm">
-      <span className="text-left font-semibold text-zinc-300 tabular-nums">
-        {fmt(v1)}
-      </span>
-      <div className="flex justify-end w-full h-2 bg-transparent rounded-full overflow-hidden">
-        <div
-          className="h-full bg-blue-500/80 rounded-full transition-all duration-500"
-          style={{ width: `${Math.max(2, p1)}%` }}
-        />
+    <div className="py-2 sm:py-2.5 border-b border-zinc-800/40 last:border-0">
+      <div className="grid grid-cols-[55px_1fr_55px] sm:grid-cols-[80px_1fr_80px] items-center gap-2 mb-1.5 text-xs sm:text-sm">
+        <span
+          className={`text-left tabular-nums ${
+            isV1Winner ? "text-blue-400 font-bold" : "text-zinc-400 font-medium"
+          }`}
+        >
+          {fmt(v1)}
+        </span>
+        <span className="text-center font-semibold text-zinc-300 text-[11px] sm:text-xs tracking-wide uppercase truncate px-1">
+          {label}
+        </span>
+        <span
+          className={`text-right tabular-nums ${
+            isV2Winner ? "text-amber-400 font-bold" : "text-zinc-400 font-medium"
+          }`}
+        >
+          {fmt(v2)}
+        </span>
       </div>
-      <div className="text-center font-medium text-zinc-400 whitespace-nowrap px-1 select-none text-[11px] sm:text-xs">
-        {label}
+      <div className="grid grid-cols-2 gap-1.5 h-1.5 w-full bg-zinc-800/40 rounded-full overflow-hidden p-0.5">
+        <div className="flex justify-end w-full">
+          <div
+            className={`h-full rounded-full transition-all duration-500 ${
+              isV1Winner
+                ? "bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.5)]"
+                : "bg-blue-500/40"
+            }`}
+            style={{ width: `${Math.max(4, p1)}%` }}
+          />
+        </div>
+        <div className="flex justify-start w-full">
+          <div
+            className={`h-full rounded-full transition-all duration-500 ${
+              isV2Winner
+                ? "bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.5)]"
+                : "bg-amber-500/40"
+            }`}
+            style={{ width: `${Math.max(4, p2)}%` }}
+          />
+        </div>
       </div>
-      <div className="flex justify-start w-full h-2 bg-transparent rounded-full overflow-hidden">
-        <div
-          className="h-full bg-amber-500/90 rounded-full transition-all duration-500"
-          style={{ width: `${Math.max(2, p2)}%` }}
-        />
-      </div>
-      <span className="text-right font-semibold text-zinc-300 tabular-nums">
-        {fmt(v2)}
-      </span>
     </div>
   );
 }
@@ -455,22 +477,22 @@ export default async function ComparePage({ searchParams }: Props) {
 
           {/* ── Contributions per Month Chart ─────────────────────────────── */}
           <div className="space-y-3 pt-2">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <h2 className="text-base font-bold text-white tracking-tight">
                 Contributions per month
               </h2>
-              <div className="flex items-center gap-4 text-xs font-medium">
+              <div className="flex flex-wrap items-center gap-3 text-xs font-medium">
                 <div className="flex items-center gap-1.5 text-zinc-300">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-blue-500" />
-                  <span>@{a.login}</span>
+                  <span className="w-2.5 h-2.5 rounded-sm bg-blue-500 shrink-0" />
+                  <span className="truncate max-w-[120px] sm:max-w-none">@{a.login}</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-zinc-300">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-amber-500" />
-                  <span>@{b.login}</span>
+                  <span className="w-2.5 h-2.5 rounded-sm bg-amber-500 shrink-0" />
+                  <span className="truncate max-w-[120px] sm:max-w-none">@{b.login}</span>
                 </div>
               </div>
             </div>
-            <div className="p-4 sm:p-5 rounded-2xl border border-zinc-800/80 bg-[#0e111c]/60 backdrop-blur-md">
+            <div className="p-3 sm:p-5 rounded-2xl border border-zinc-800/80 bg-[#0e111c]/60 backdrop-blur-md overflow-hidden">
               <MonthlyContributionChart
                 data={monthlyData}
                 u1Name={a.login}

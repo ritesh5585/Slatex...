@@ -97,31 +97,33 @@ export function CommitRepoCards({
           let latestDateLabel = "Recent";
           if (latestCommit?.occurredAt) {
             const date = new Date(latestCommit.occurredAt);
-            const daysAgo = Math.round((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
-            latestDateLabel = daysAgo === 0 ? "Today" : daysAgo === 1 ? "Yesterday" : `${daysAgo}d ago`;
+            latestDateLabel = date.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            });
           }
 
           return (
             <Card
               key={repo.id || `${repo.owner.login}/${repo.name}-${idx}`}
-              className="flex flex-col justify-between p-5 border-zinc-800/80 bg-zinc-900/50 backdrop-blur-md hover:border-zinc-700/80 transition-all duration-200 group"
+              className="flex flex-col justify-between p-4 sm:p-5 border-zinc-800/80 bg-zinc-900/50 backdrop-blur-md hover:border-zinc-700/80 transition-all duration-200 group"
             >
               <div>
                 {/* Header: Repo info & commit count badge */}
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-2.5">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-mono mb-1 truncate">
                       <img
                         src={repo.owner.avatarUrl || "https://github.com/ghost.png"}
                         alt={repo.owner.login}
-                        className="h-4 w-4 rounded-full ring-1 ring-zinc-700 shrink-0"
+                        className="h-3.5 w-3.5 rounded-full ring-1 ring-zinc-700 shrink-0"
                       />
-                      <span>{repo.owner.login}</span>
+                      <span className="truncate">{repo.owner.login}</span>
                     </div>
 
                     <Link
                       href={`/repo?owner=${repo.owner.login}&repo=${repo.name}`}
-                      className="text-base font-semibold text-white group-hover:text-indigo-400 transition-colors truncate block"
+                      className="text-sm sm:text-base font-semibold text-white group-hover:text-indigo-400 transition-colors truncate block"
                     >
                       {repo.name}
                     </Link>
@@ -129,8 +131,8 @@ export function CommitRepoCards({
 
                   {/* Commits count badge */}
                   <div className="shrink-0 flex flex-col items-end">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 px-2.5 py-1 text-xs font-bold text-indigo-400 shadow-sm">
-                      <GitCommit className="h-3.5 w-3.5" />
+                    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs font-bold text-indigo-400 shadow-sm">
+                      <GitCommit className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                       <span>{totalCommitsInRepo} commit{totalCommitsInRepo !== 1 ? "s" : ""}</span>
                     </span>
                     <span className="text-[10px] text-zinc-500 mt-1 flex items-center gap-1">
