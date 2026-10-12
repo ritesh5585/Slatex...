@@ -36,41 +36,6 @@ export interface GitHubRepoGQL {
   isFork: boolean;
 }
 
-export interface CommitNode {
-  oid: string;
-  committedDate: string;
-  additions: number;
-  deletions: number;
-  message: string;
-  author: {
-    name: string | null;
-    avatarUrl: string | null;
-    user: { login: string; url: string } | null;
-  } | null;
-}
-
-export interface ContributionDay {
-  date: string;
-  contributionCount: number;
-}
-
-export interface ContributionCalendar {
-  totalContributions: number;
-  weeks: { contributionDays: ContributionDay[] }[];
-}
-
-export interface GitHubUserRepoGQL {
-  id: string;
-  name: string;
-  description: string | null;
-  url: string;
-  stargazerCount: number;
-  forkCount: number;
-  updatedAt: string;
-  primaryLanguage: { name: string; color: string } | null;
-  repositoryTopics: { nodes: { topic: { name: string } }[] };
-}
-
 export interface RepoCommitContribution {
   repository: {
     id: string;
@@ -92,14 +57,6 @@ export interface RepoCommitContribution {
       url: string;
     }[];
   };
-}
-
-export interface UserCommitActivity {
-  totalCommitContributions: number;
-  totalRepositoriesWithContributedCommits: number;
-  totalContributions: number;
-  contributions: ContributionDay[];
-  repoCommitContributions: RepoCommitContribution[];
 }
 
 export interface GitHubCommit {
@@ -173,6 +130,41 @@ export interface GitHubRepo {
   topics?: string[];
 }
 
+export interface GitHubUserRepoGQL {
+  id: string;
+  name: string;
+  description: string | null;
+  url: string;
+  stargazerCount: number;
+  forkCount: number;
+  updatedAt: string;
+  primaryLanguage: { name: string; color: string } | null;
+  repositoryTopics: { nodes: { topic: { name: string } }[] };
+}
+
+export interface CommitNode {
+  oid: string;
+  committedDate: string;
+  additions: number;
+  deletions: number;
+  message: string;
+  author: {
+    name: string | null;
+    avatarUrl: string | null;
+    user: { login: string; url: string } | null;
+  } | null;
+}
+
+export interface ContributionDay {
+  date: string;
+  contributionCount: number;
+}
+
+export interface ContributionCalendar {
+  totalContributions: number;
+  weeks: { contributionDays: ContributionDay[] }[];
+}
+
 export interface ComparedUser {
   login: string;
   name: string | null;
@@ -240,4 +232,12 @@ export interface ComparisonResult {
   user2: ComparedUser;
   monthlyData: MonthlyPoint[];
   insight: ComparisonInsight;
-}
+}
+
+export interface UserCommitActivity {
+  totalCommitContributions: number;
+  totalRepositoriesWithContributedCommits: number;
+  totalContributions: number;
+  contributions: ContributionDay[];
+  repoCommitContributions: RepoCommitContribution[];
+}

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { AlertCircle, UserX } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RepoLayout as RepoPageClient } from "@/components/repo/repo-layout";
 import { CommitActivity } from "@/components/repo/commit-activity";
