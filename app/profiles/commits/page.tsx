@@ -29,6 +29,8 @@ interface Props {
 }
 
 
+export const dynamic = "force-dynamic";
+
 export default async function UserCommitsPage({ searchParams }: Props) {
   const { username } = await searchParams;
 

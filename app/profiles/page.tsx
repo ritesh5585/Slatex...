@@ -22,6 +22,8 @@ interface Props {
   searchParams: Promise<{ username?: string }>;
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function ResultPage({ searchParams }: Props) {
   const { username } = await searchParams;
 

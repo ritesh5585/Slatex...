@@ -211,6 +211,8 @@ function TopReposCard({ user, fallbackColor }: { user: ComparedUser; fallbackCol
   );
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function ComparePage({ searchParams }: Props) {
   const { user1, user2 } = await searchParams;
 

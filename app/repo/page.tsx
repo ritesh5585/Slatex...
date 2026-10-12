@@ -43,6 +43,8 @@ function parseRepoParams({ owner, repo, url }: Awaited<Props["searchParams"]>) {
   }
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function RepoPage({ searchParams }: Props) {
   const { owner, name } = parseRepoParams(await searchParams);
   if (!owner || !name) {
