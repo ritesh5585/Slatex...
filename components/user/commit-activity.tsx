@@ -80,11 +80,10 @@ export function CommitActivity({ contributions = [] }: CommitActivityProps) {
                 initial={{ height: 0 }}
                 animate={{ height: `${heightPercent}%` }}
                 transition={{ duration: 0.4, delay: i * 0.02, ease: "easeOut" }}
-                className={`w-full rounded-sm transition-all duration-150 ${
-                  hasActivity
+                className={`w-full rounded-sm transition-all duration-150 ${hasActivity
                     ? "bg-indigo-500 hover:bg-indigo-400 shadow-[0_0_6px_rgba(99,102,241,0.3)]"
                     : "bg-zinc-800/80 hover:bg-zinc-700"
-                }`}
+                  }`}
                 style={{ minHeight: hasActivity ? 6 : 3 }}
               />
 

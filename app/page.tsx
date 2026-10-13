@@ -12,7 +12,7 @@ import {
   CtaBanner,
   Footer,
   CompareModal,
-  YouTubeModal,
+  ResumeModal,
   OpenSourceModal,
   ProfilePromptModal,
 } from "@/components/landing";
@@ -22,7 +22,7 @@ export default function Home() {
 
   // Modals state
   const [isCompareOpen, setIsCompareOpen] = useState(false);
-  const [isYouTubeOpen, setIsYouTubeOpen] = useState(false);
+  const [isResumeOpen, setIsResumeOpen] = useState(false);
   const [isOpenSourceOpen, setIsOpenSourceOpen] = useState(false);
   const [isProfilePromptOpen, setIsProfilePromptOpen] = useState(false);
 
@@ -69,7 +69,7 @@ export default function Home() {
           onExploreClick={handleFocusSearch}
           onCompareClick={() => setIsCompareOpen(true)}
           onOpenSourceClick={() => setIsOpenSourceOpen(true)}
-          onYouTubeClick={() => setIsYouTubeOpen(true)}
+          onResumeClick={() => setIsResumeOpen(true)}
         />
 
         {/* 3-Step Workflow */}
@@ -97,9 +97,9 @@ export default function Home() {
         isOpen={isOpenSourceOpen}
         onClose={() => setIsOpenSourceOpen(false)}
       />
-      <YouTubeModal
-        isOpen={isYouTubeOpen}
-        onClose={() => setIsYouTubeOpen(false)}
+      <ResumeModal
+        isOpen={isResumeOpen}
+        onClose={() => setIsResumeOpen(false)}
       />
       <ProfilePromptModal
         isOpen={isProfilePromptOpen}

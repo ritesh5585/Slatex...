@@ -94,9 +94,8 @@ export function RepoGrid({ repos }: RepoGridProps) {
                 : `Show all ${repos.length} repositories`}
             </span>
             <ChevronDown
-              className={`h-4 w-4 text-zinc-400 transition-transform duration-300 ${
-                isExpanded ? "rotate-180" : ""
-              }`}
+              className={`h-4 w-4 text-zinc-400 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""
+                }`}
             />
           </Button>
         </div>

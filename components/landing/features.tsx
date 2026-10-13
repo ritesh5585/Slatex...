@@ -4,7 +4,7 @@ import React from "react";
 import {
   Compass,
   GitCompare,
-  PlaySquare,
+  FileText,
   GitFork,
   ArrowUpRight,
 } from "lucide-react";
@@ -12,7 +12,7 @@ import {
 interface FeaturesProps {
   onExploreClick?: () => void;
   onCompareClick?: () => void;
-  onYouTubeClick?: () => void;
+  onResumeClick?: () => void;
   onOpenSourceClick?: () => void;
 }
 
@@ -29,7 +29,7 @@ interface FeatureItem {
 export function Features({
   onExploreClick,
   onCompareClick,
-  onYouTubeClick,
+  onResumeClick,
   onOpenSourceClick,
 }: FeaturesProps) {
   const features: FeatureItem[] = [
@@ -76,18 +76,19 @@ export function Features({
       onClick: onOpenSourceClick,
     },
     {
-      id: "youtube",
-      title: "YouTube insights",
+      id: "resume-analyzer",
+      title: "Resume analyzer",
       badge: "Coming soon",
-      description: "Paste a channel link to see creator and content metrics.",
-      tags: ["Creator stats", "Engagement"],
+      description:
+        "Upload your resume to extract key details and get actionable ATS improvements.",
+      tags: ["ATS insights", "Skill extraction"],
       icon: (
-        <PlaySquare
+        <FileText
           className="w-4 h-4 text-rose-400"
           suppressHydrationWarning
         />
       ),
-      onClick: onYouTubeClick,
+      onClick: onResumeClick,
     },
   ];
 

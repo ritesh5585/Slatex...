@@ -4,14 +4,11 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   GitCommit,
-  GitBranch,
   Star,
-  GitFork,
   ExternalLink,
   Search,
   Calendar,
   Layers,
-  Sparkles,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

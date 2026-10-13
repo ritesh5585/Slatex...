@@ -28,9 +28,9 @@ export function HeroSection({ user }: HeroSectionProps) {
 
   const formattedJoinDate = user.created_at
     ? new Date(user.created_at).toLocaleDateString("en-US", {
-        month: "short",
-        year: "numeric",
-      })
+      month: "short",
+      year: "numeric",
+    })
     : null;
 
   const blogUrl = user.blog

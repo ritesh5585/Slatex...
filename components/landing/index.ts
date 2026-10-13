@@ -8,6 +8,6 @@ export * from "./faq";
 export * from "./cta-banner";
 export * from "./footer";
 export * from "./compare-modal";
-export * from "./youtube-modal";
+export * from "./resume-modal";
 export * from "./opensource-modal";
 export * from "./profile-prompt-modal";
