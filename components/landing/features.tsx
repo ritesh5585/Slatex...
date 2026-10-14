@@ -66,7 +66,7 @@ export function Features({
     {
       id: "opensource",
       title: "Find open source",
-      badge: "Coming soon",
+      badge: "Beta",
       description:
         "Beginner-friendly projects that match the skills and languages you use.",
       tags: ["Skill match", "Trending"],
