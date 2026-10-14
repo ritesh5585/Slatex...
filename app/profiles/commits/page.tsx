@@ -18,7 +18,7 @@ import { Card } from "@/components/ui/card";
 import ErrorPage from "@/components/shared/Error";
 
 import {
-  getUserByUsername,
+  getProfileBundle,
   getUserCommitActivity,
   NotFoundError,
   RateLimitError,
@@ -48,14 +48,16 @@ export default async function UserCommitsPage({ searchParams }: Props) {
   }
 
   const cleanUsername = username.trim().replace(/^@/, "");
-  let user: Awaited<ReturnType<typeof getUserByUsername>>;
+  let user: Awaited<ReturnType<typeof getProfileBundle>>["user"];
   let commitActivity: Awaited<ReturnType<typeof getUserCommitActivity>>;
 
   try {
-    [user, commitActivity] = await Promise.all([
-      getUserByUsername(cleanUsername),
+    const [bundle, activity] = await Promise.all([
+      getProfileBundle(cleanUsername),
       getUserCommitActivity(cleanUsername),
     ]);
+    user = bundle.user;
+    commitActivity = activity;
   } catch (err) {
     if (err instanceof NotFoundError) {
       return (

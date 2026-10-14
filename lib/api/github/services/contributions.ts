@@ -31,7 +31,7 @@ interface CommitContributionsResponse {
 
 export const getUserContributions = (username: string) =>
   cached(`gh:v1:contrib:${username.toLowerCase()}`, 3600, async () => {
-    await enforceLimit();
+    await enforceLimit("gh/contrib");
     const data = await githubGraphQL<ContributionsResponse>(
       GET_CONTRIBUTIONS_QUERY,
       { username },
@@ -48,7 +48,7 @@ export const getUserCommitActivity = (
   username: string,
 ): Promise<UserCommitActivity> =>
   cached(`gh:v1:commit-activity:${username.toLowerCase()}`, 3600, async () => {
-    await enforceLimit();
+    await enforceLimit("gh/commit-activity");
     const data = await githubGraphQL<CommitContributionsResponse>(
       GET_USER_COMMIT_CONTRIBUTIONS_QUERY,
       { username },

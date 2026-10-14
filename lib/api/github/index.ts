@@ -5,5 +5,6 @@ export * from "./services/users";
 export * from "./services/repos";
 export * from "./services/commits";
 export * from "./services/contributions";
-export * from "./services/readme";
 export * from "./services/compare";
+export * from "./services/profile-bundle";
+export * from "./services/repo-bundle";

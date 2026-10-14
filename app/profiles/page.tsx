@@ -11,9 +11,7 @@ import Link from "next/link";
 import ErrorPage from "@/components/shared/Error";
 
 import {
-  getUserByUsername,
-  getUserRepos,
-  getUserContributions,
+  getProfileBundle,
   NotFoundError,
   RateLimitError,
   ClientRateLimitError,
@@ -41,16 +39,15 @@ export default async function ResultPage({ searchParams }: Props) {
   }
 
   const cleanUsername = username.trim().replace(/^@/, "");
-  let user: Awaited<ReturnType<typeof getUserByUsername>>;
-  let userRepos: Awaited<ReturnType<typeof getUserRepos>>;
-  let contributionData: Awaited<ReturnType<typeof getUserContributions>>;
+  let user: Awaited<ReturnType<typeof getProfileBundle>>["user"];
+  let userRepos: Awaited<ReturnType<typeof getProfileBundle>>["repos"];
+  let contributionData: Awaited<ReturnType<typeof getProfileBundle>>["contributions"];
 
   try {
-    [user, userRepos, contributionData] = await Promise.all([
-      getUserByUsername(cleanUsername),
-      getUserRepos(cleanUsername),
-      getUserContributions(cleanUsername),
-    ]);
+    const bundle = await getProfileBundle(cleanUsername);
+    user = bundle.user;
+    userRepos = bundle.repos;
+    contributionData = bundle.contributions;
   } catch (err) {
     if (err instanceof NotFoundError) {
       return (

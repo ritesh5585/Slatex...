@@ -286,13 +286,39 @@ export function ReadmeViewer({ content, owner, repoName, branch = "HEAD" }: Prop
                       {...props}
                     />
                   ),
-                  // @ts-ignore
-                  code: ({ inline, className, children, ...props }) => {
-                    if (inline) {
-                      return <code className={className} {...props}>{children}</code>;
-                    }
-                    return <CodeBlock className={className}>{children}</CodeBlock>;
+                  // The correct fix for react-markdown v7+:
+                  // Override `pre` (not `code`) for block code fences.
+                  // `pre` is only rendered for fenced code blocks, never
+                  // for inline code — so it is safe to wrap in <div><pre>.
+                  // Inline `<code>` inside paragraphs is handled by the
+                  // `code` override below which renders a plain <code> span.
+                  pre: ({ children, ...props }: any) => {
+                    // Extract the code string from the nested <code> child
+                    const codeChild = Array.isArray(children)
+                      ? children[0]
+                      : children;
+                    const codeText =
+                      typeof codeChild?.props?.children === "string"
+                        ? codeChild.props.children
+                        : String(codeChild?.props?.children ?? "");
+                    const className = codeChild?.props?.className ?? undefined;
+                    return (
+                      <CodeBlock className={className}>{codeText}</CodeBlock>
+                    );
                   },
+                  // Inline code — must stay as a plain <code> span so it
+                  // never introduces block elements inside a <p>.
+                  code: ({ children, className, ...props }: any) => (
+                    <code
+                      className={
+                        className ??
+                        "text-blue-300 bg-zinc-800/80 px-1.5 py-0.5 rounded text-[0.85em]"
+                      }
+                      {...props}
+                    >
+                      {children}
+                    </code>
+                  ),
                   h1: headingComponent(1),
                   h2: headingComponent(2),
                   h3: headingComponent(3),

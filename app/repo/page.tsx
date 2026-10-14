@@ -12,9 +12,7 @@ import { RepoStats } from "@/components/repo/repo-stats";
 import ErrorShell from "@/components/shared/Error";
 import {
   getCommitHistory,
-  getRepo,
-  getRepoLanguages,
-  getRepoReadme,
+  getRepoBundle,
   NotFoundError,
   RateLimitError,
   ClientRateLimitError,
@@ -70,17 +68,13 @@ export default async function RepoPage({ searchParams }: Props) {
 
   try {
     const [
-      repo,
-      languageEdges,
+      bundle,
       commits,
-      readme,
       contributorsResponse,
       activityResponse,
     ] = await Promise.all([
-      getRepo(owner, name),
-      getRepoLanguages(owner, name),
+      getRepoBundle(owner, name),
       getCommitHistory(owner, name, 30),
-      getRepoReadme(owner, name),
       fetch(
         `https://api.github.com/repos/${owner}/${name}/contributors?per_page=10`,
         { headers, next: { revalidate: 3600 } },
@@ -90,6 +84,8 @@ export default async function RepoPage({ searchParams }: Props) {
         { headers, next: { revalidate: 1800 } },
       ),
     ]);
+
+    const { repo, languageEdges, readme } = bundle;
 
     const [contributorData, activityData] = await Promise.all([
       contributorsResponse.ok ? contributorsResponse.json() : [],

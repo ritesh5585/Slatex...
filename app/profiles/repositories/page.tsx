@@ -13,8 +13,7 @@ import { RepoListView } from "@/components/user/repo-list-view";
 import ErrorPage from "@/components/shared/Error";
 import { type GitHubRepo } from "@/components/user/repo-card";
 import {
-  getUserByUsername,
-  getUserRepos,
+  getProfileBundle,
   NotFoundError,
   RateLimitError,
   ClientRateLimitError,
@@ -42,14 +41,13 @@ export default async function UserReposPage({ searchParams }: Props) {
   }
 
   const cleanUsername = username.trim().replace(/^@/, "");
-  let user: Awaited<ReturnType<typeof getUserByUsername>>;
-  let userRepos: Awaited<ReturnType<typeof getUserRepos>>;
+  let user: Awaited<ReturnType<typeof getProfileBundle>>["user"];
+  let userRepos: Awaited<ReturnType<typeof getProfileBundle>>["repos"];
 
   try {
-    [user, userRepos] = await Promise.all([
-      getUserByUsername(cleanUsername),
-      getUserRepos(cleanUsername, 100),
-    ]);
+    const bundle = await getProfileBundle(cleanUsername);
+    user = bundle.user;
+    userRepos = bundle.repos;
   } catch (err) {
     if (err instanceof NotFoundError) {
       return (

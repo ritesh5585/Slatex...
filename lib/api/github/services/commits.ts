@@ -24,7 +24,7 @@ export const getCommitHistory = (
     `gh:v1:commits:${owner}/${name}:${first}:${since ?? "all"}`.toLowerCase(),
     300,
     async () => {
-      await enforceLimit();
+      await enforceLimit("gh/commits");
       const data = await githubGraphQL<CommitHistoryResponse>(
         GET_COMMIT_HISTORY_QUERY,
         {

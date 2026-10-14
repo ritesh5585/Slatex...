@@ -347,7 +347,7 @@ export const compareGitHubUsers = (
   const cacheKey = `gh:v1:compare:${ka}:${kb}`;
 
   return cached(cacheKey, 900, async () => {
-    await enforceLimit();
+    await enforceLimit("gh/compare");
     const raw = await githubGraphQL<{
       user1: RawUserNode | null;
       user2: RawUserNode | null;
