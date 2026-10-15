@@ -1,14 +1,3 @@
-/**
- * Bundled GraphQL queries — 1 network round-trip per page instead of N.
- *
- * Rule: bundle only fields that share the same owner/name key, change
- * together, and are consumed on the same page.  Commits stay separate
- * because they accept a variable `first` and have their own TTL (300 s).
- */
-
-// ─── Profile bundle ─────────────────────────────────────────────────────────
-// Replaces: GET_USER_QUERY + GET_USER_REPOS_QUERY + GET_CONTRIBUTIONS_QUERY
-// Cache key: gh:v1:profile-bundle:<username>   TTL: 600 s (lowest of the three)
 export const GET_PROFILE_BUNDLE_QUERY = `
   query GetProfileBundle($username: String!, $reposFirst: Int = 100) {
     rateLimit { cost remaining resetAt }

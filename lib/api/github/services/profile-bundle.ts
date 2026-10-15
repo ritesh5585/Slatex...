@@ -1,14 +1,3 @@
-/**
- * getProfileBundle — fetches user + repos + contributions in a single
- * GraphQL round-trip, consuming exactly 1 rate-limit unit instead of 3.
- *
- * Cache TTL: 600 s  (min of the individual TTLs: user=600, repos=600, contrib=3600)
- * Cache key: gh:v1:profile-bundle:<username>
- *
- * Sub-pages (/profiles/commits, /profiles/repositories) call their own
- * specialised loaders; those loaders will usually HIT cache for the
- * user fields that were already populated by the bundle on /profiles.
- */
 import { githubGraphQL } from "../client";
 import { GET_PROFILE_BUNDLE_QUERY } from "../queries/bundles.query";
 import { NotFoundError } from "@/lib/api/with-github-errors";
@@ -23,15 +12,17 @@ import type {
 // ── Raw GQL response shape ────────────────────────────────────────────────────
 interface ProfileBundleResponse {
   rateLimit: { cost: number; remaining: number; resetAt: string };
-  user: (GitHubUserGQL & {
-    repoList: { nodes: GitHubUserRepoGQL[] };
-    contributionsCollection: {
-      contributionCalendar: {
-        totalContributions: number;
-        weeks: { contributionDays: ContributionDay[] }[];
-      };
-    };
-  }) | null;
+  user:
+    | (GitHubUserGQL & {
+        repoList: { nodes: GitHubUserRepoGQL[] };
+        contributionsCollection: {
+          contributionCalendar: {
+            totalContributions: number;
+            weeks: { contributionDays: ContributionDay[] }[];
+          };
+        };
+      })
+    | null;
 }
 
 // ── Public return type ────────────────────────────────────────────────────────
@@ -66,8 +57,7 @@ export const getProfileBundle = (
 
       if (!data.user) throw new NotFoundError(`User "${username}"`);
 
-      const calendar =
-        data.user.contributionsCollection.contributionCalendar;
+      const calendar = data.user.contributionsCollection.contributionCalendar;
 
       return {
         user: data.user,

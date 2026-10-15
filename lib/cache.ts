@@ -1,14 +1,6 @@
 // lib/cache.ts
 import { redis } from "./redis";
 
-/**
- * Null-safe generic cache wrapper.
- *
- * Bug fix: the old version stored bare values, so when loader() returned
- * null (e.g. getRepoReadme for a repo with no README) Redis stored `null`,
- * which is indistinguishable from a cache MISS.  We now wrap every value in
- * { v: T } so that `{ v: null }` is a valid HIT and we never re-fetch.
- */
 export async function cached<T>(
   key: string,
   ttl: number,

@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   BookOpen,
   BarChart2,
+  GitFork,
 } from "lucide-react";
 import { DashboardSidebar } from "./dashboard-sidebar";
 
@@ -36,11 +37,13 @@ export function DashboardHeader({
 
   const currentTab =
     activeTab ||
-    (pathname?.includes("/repositories")
-      ? "repos"
-      : pathname?.includes("/commits")
-        ? "commits"
-        : "overview");
+    (pathname?.startsWith("/find")
+      ? "find"
+      : pathname?.includes("/repositories")
+        ? "repos"
+        : pathname?.includes("/commits")
+          ? "commits"
+          : "overview");
 
   const [searchValue, setSearchValue] = useState(cleanUser);
 
@@ -77,6 +80,12 @@ export function DashboardHeader({
       label: "Commits",
       icon: BarChart2,
       href: `/profiles/commits?username=${encodeURIComponent(cleanUser)}`,
+    },
+    {
+      id: "find",
+      label: "Find projects",
+      icon: GitFork,
+      href: cleanUser ? `/find/${encodeURIComponent(cleanUser)}` : "/find",
     },
   ];
 

@@ -74,7 +74,7 @@ export function getLanguageColor(language: string | null | undefined): string {
   // 2. Case-insensitive match (GitHub sometimes returns "javascript" vs "JavaScript")
   const lowerLang = language.toLowerCase();
   const foundKey = Object.keys(LANGUAGE_COLORS).find(
-    (key) => key.toLowerCase() === lowerLang
+    (key) => key.toLowerCase() === lowerLang,
   );
   if (foundKey) {
     return LANGUAGE_COLORS[foundKey];
@@ -88,3 +88,26 @@ export function getLanguageColor(language: string | null | undefined): string {
   const index = Math.abs(hash) % FALLBACK_LANGUAGE_COLORS.length;
   return FALLBACK_LANGUAGE_COLORS[index];
 }
+export const LANG_COLORS: Record<string, string> = {
+  TypeScript: "#3178c6",
+  JavaScript: "#f1e05a",
+  Python: "#3572A5",
+  Go: "#00ADD8",
+  Rust: "#dea584",
+  Ruby: "#701516",
+  Java: "#b07219",
+  "C++": "#f34b7d",
+  C: "#555555",
+  "C#": "#178600",
+  PHP: "#4F5D95",
+  Swift: "#F05138",
+  Kotlin: "#A97BFF",
+  Dart: "#00B4AB",
+  Vue: "#41b883",
+  Svelte: "#ff3e00",
+  Elixir: "#6e4a7e",
+  Haskell: "#5e5086",
+  Shell: "#89e051",
+  HTML: "#e34c26",
+  CSS: "#563d7c",
+};

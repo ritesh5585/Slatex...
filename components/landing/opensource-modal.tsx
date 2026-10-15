@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { X, GitFork, ArrowRight } from "lucide-react";
-import type { GitHubUserGQL } from "@/lib/api/github";
 
 interface OpenSourceModalProps {
   isOpen: boolean;
@@ -10,29 +10,19 @@ interface OpenSourceModalProps {
 }
 
 export function OpenSourceModal({ isOpen, onClose }: OpenSourceModalProps) {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
-  const [, setUserProfile] = useState<GitHubUserGQL | null>(null);
 
   if (!isOpen) return null;
 
-  const handleMatchProfile = async (e: React.FormEvent) => {
+  const handleMatchProfile = (e: React.FormEvent) => {
     e.preventDefault();
     const clean = username.trim().replace(/^@/, "");
     if (!clean) return;
     setLoading(true);
-
-    try {
-      const res = await fetch(`/api/github/user/${encodeURIComponent(clean)}`);
-      if (res.ok) {
-        const data = await res.json();
-        setUserProfile(data);
-      }
-    } catch {
-      // fallback
-    } finally {
-      setLoading(false);
-    }
+    onClose();
+    router.push(`/find/${encodeURIComponent(clean)}` as any);
   };
 
   return (
@@ -72,7 +62,7 @@ export function OpenSourceModal({ isOpen, onClose }: OpenSourceModalProps) {
         {/* Input */}
         <form onSubmit={handleMatchProfile} className="mt-4 space-y-3">
           <label className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
-            Match by GitHub Profile
+            Match by GitHub profile
           </label>
           <div className="flex flex-col sm:flex-row gap-2">
             <input
@@ -81,13 +71,14 @@ export function OpenSourceModal({ isOpen, onClose }: OpenSourceModalProps) {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="e.g. ritesh5585"
               className="flex-1 rounded-xl border border-zinc-800 bg-[#121522] px-3 py-2 text-xs sm:text-sm text-white placeholder-zinc-500 outline-none focus:border-indigo-500/60"
+              aria-label="GitHub username"
             />
             <button
               type="submit"
               disabled={loading || !username.trim()}
               className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold cursor-pointer"
             >
-              <span>Scan Skills</span>
+              <span>Find projects</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
