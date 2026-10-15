@@ -130,19 +130,4 @@ lib/
 - New repos with zero languages needed an explicit empty state instead of an empty chart rendering as a blank box
 - Users with no public repos or no commit activity needed their own empty states
 
-## Roadmap
-
-- [x] Response caching (Upstash Redis, versioned keys)
-- [x] Per-IP rate limiting on cache misses
-- [ ] Fewer GitHub calls per page: bundle profile and repo loaders into one GraphQL query each
-- [ ] Global rate-limit guard to protect the shared GitHub token
-- [ ] Open-source repo recommendations based on a user's languages and topics (heuristic skill profile → GitHub search → scored results, with its own rate-limit bucket)
-- [ ] GitHub OAuth (per-user quota, history, bookmarks)
-- [ ] Repo digest: turn a repo into an LLM-friendly text prompt
-- [ ] Auto-generated architecture diagram for a repo
-- [ ] Export the dashboard as an image or PDF
-- [ ] Light theme (currently dark-only)
-
-## License
-
 MIT
