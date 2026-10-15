@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { DashboardSidebar } from "@/components/user/dashboard-sidebar";
 import { DashboardHeader } from "@/components/user/dashboard-header";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Find projects — Slatex",
@@ -20,12 +23,16 @@ export default function FindLayout({
     >
       {/* ── Left Sidebar ─────────────────────────────────────────────────── */}
       <div className="hidden md:flex w-52 shrink-0 flex-col h-full">
-        <DashboardSidebar activeTab="find" />
+        <Suspense fallback={<div className="w-52 h-full" />}>
+          <DashboardSidebar activeTab="find" />
+        </Suspense>
       </div>
 
       {/* ── Main Content Area ─────────────────────────────────────────────── */}
       <div className="relative flex-1 flex flex-col min-w-0 overflow-hidden">
-        <DashboardHeader activeTab="find" />
+        <Suspense fallback={<div className="h-14 w-full" />}>
+          <DashboardHeader activeTab="find" />
+        </Suspense>
 
         {/* Scrollable */}
         <div className="relative flex-1 overflow-y-auto">

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { FindSearchForm } from "@/components/find/FindSearchForm";
 import { GitFork } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Find projects — Slatex",
   description: "Analyze a GitHub profile and discover open source projects to contribute to.",
