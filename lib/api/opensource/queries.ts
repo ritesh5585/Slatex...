@@ -68,7 +68,7 @@ async function searchOneSignal(
   level: SkillLevel,
 ): Promise<SearchItem[]> {
   const q = encodeURIComponent(buildQuery(signal, level));
-  const url = `${GITHUB_API}/search/repositories?q=${q}&sort=stars&per_page=10`;
+  const url = `${GITHUB_API}/search/repositories?q=${q}&sort=stars&per_page=15`;
   const res = await ghFetch(url);
 
   if (res.status === 403 || res.status === 429) return [];
