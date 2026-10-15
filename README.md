@@ -120,3 +120,24 @@ lib/
   language-colors.ts                language → hex map
   utils.ts
 ```
+
+## Things that were annoying to get right
+
+- GitHub returns different failure modes (rate limit, bad token, missing user, network) that all need different UI and status codes, hence the typed error classes
+- Doing the heatmap and language chart at 375px first and scaling up took a full redesign pass; they did not just "shrink nicely" from the desktop versions
+- New repos with zero languages needed an explicit empty state instead of an empty chart rendering as a blank box
+- Users with no public repos or no commit activity needed their own empty states
+
+## Roadmap
+
+- [ ] Response caching and per-user rate limiting
+- [ ] GitHub OAuth (per-user quota, history, bookmarks)
+- [ ] Open-source repo recommendations based on a user's languages and topics
+- [ ] Repo digest: turn a repo into an LLM-friendly text prompt
+- [ ] Auto-generated architecture diagram for a repo
+- [ ] Export the dashboard as an image or PDF
+- [ ] Light theme (currently dark-only)
+
+## License
+
+MIT
