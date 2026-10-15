@@ -39,12 +39,15 @@ export interface ProfileBundle {
 export const getProfileBundle = (
   username: string,
   reposFirst: number = 100,
+  skipRateLimit: boolean = false,
 ): Promise<ProfileBundle> =>
   cached(
     `gh:v1:profile-bundle:${username.toLowerCase()}:${reposFirst}`,
     600,
     async () => {
-      await enforceLimit("gh/profile-bundle");
+      if (!skipRateLimit) {
+        await enforceLimit("gh/profile-bundle");
+      }
       const data = await githubGraphQL<ProfileBundleResponse>(
         GET_PROFILE_BUNDLE_QUERY,
         { username, reposFirst },

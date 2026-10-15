@@ -3,14 +3,31 @@ import { getUserSignals } from "./skills";
 import { searchProjects } from "./queries";
 import { scoreAllProjects } from "./score";
 import { cached } from "@/lib/cache";
+import { enforceFindRepoLimit } from "@/lib/rate-limiter";
 import type { FindProjectsResult } from "./types";
 
 export async function findProjectsForUser(
   username: string,
 ): Promise<FindProjectsResult> {
+  // Enforce dedicated rate limit for finding projects (20 req/hr per IP)
+  try {
+    await enforceFindRepoLimit("find/repo");
+  } catch (err: unknown) {
+    const errName = (err as Error)?.name ?? "";
+    if (errName === "RateLimitError" || errName === "ClientRateLimitError") {
+      const retryAfter = (err as { retryAfter?: number }).retryAfter ?? 3600;
+      return { status: "rate_limited", retryAfter };
+    }
+    return {
+      status: "error",
+      message: (err as Error)?.message ?? "Rate limit error",
+    };
+  }
+
   let bundle: Awaited<ReturnType<typeof getProfileBundle>>;
   try {
-    bundle = await getProfileBundle(username);
+    // Skip normal 60 req/hr limiter so Find Projects has its own dedicated quota
+    bundle = await getProfileBundle(username, 100, true);
   } catch (err: unknown) {
     const errName = (err as Error)?.name ?? "";
     if (errName === "NotFoundError") return { status: "not_found" };

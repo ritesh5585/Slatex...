@@ -1,4 +1,3 @@
-import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function CardSkeleton() {
@@ -57,7 +56,7 @@ function CardSkeleton() {
   );
 }
 
-export function FindProjectsSkeleton() {
+export default function Loading() {
   return (
     <div
       className="flex flex-col gap-6"
@@ -120,8 +119,4 @@ export function FindProjectsSkeleton() {
       </div>
     </div>
   );
-}
-
-export default function Loading() {
-  return <FindProjectsSkeleton />;
 }
