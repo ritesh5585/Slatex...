@@ -13,17 +13,17 @@ Try `ritesh5585`, `vercel/next.js`, or just paste a full GitHub URL.
 - Type a username → get a profile dashboard (avatar, bio, followers/following, public repos, top languages, recent repositories)
 - Type `owner/repo` or paste a GitHub URL → get a repo breakdown (stars, forks, open issues, PRs, license, topics, contributors, recent commits, README)
 - Contribution heatmap for the last 12 months, GitHub-graph style, with per-day tooltips
-- Weekly commit activity chart with period filters (7D / 30D / 3M / 1Y)
 - Language distribution as a stacked bar with a legend instead of GitHub's plain list
 - Commits view: the repositories a user has actively pushed to, with a live filter
-- Compare two developers side by side (followers, contributions, top repos, languages, monthly activity)
+- Compare two developers side by side (followers, contributions, top repos, languages, monthly activity). Both profiles come back in a single GraphQL query, and the comparison page has a shareable URL
 - README rendered directly in the page so you don't have to tab over
+- Redis caching and per-IP rate limiting, so repeat visits are fast and one visitor can't use up the shared GitHub quota (see below)
 
 It also tries not to fall over when data is incomplete, which happens more than you'd think: empty repos have no languages, some users have no public repos, and commit stats can be missing or still loading. There's an explicit fallback or empty state for most of that instead of a blank screen or a stack trace. Route-level `loading.tsx` skeletons cover the loading side.
 
 ## Stack
 
-Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Framer Motion and GSAP for the animations, Recharts for charts, and the **GitHub GraphQL API** for data. Deployed on Vercel.
+Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Framer Motion and GSAP for the animations, Recharts for charts, and the **GitHub GraphQL API** for data. Upstash Redis for caching and rate limiting. Deployed on Vercel.
 
 GitHub calls happen on the server (services + route handlers), so the token never reaches the browser.
 
@@ -32,13 +32,27 @@ GitHub calls happen on the server (services + route handlers), so the token neve
 ```
 Browser → page / route handler
         → service  (users, repos, commits, contributions, readme, compare)
-        → githubGraphQL()  (single client: auth, error mapping)
+        → cached(key, loader)
+             ├─ HIT  → return from Redis, no GitHub call
+             └─ MISS → enforceLimit() → githubGraphQL() → store in Redis
         → GitHub GraphQL API
         → typed result → UI
 ```
 
 - `queries/` holds the raw GraphQL documents, `services/` turns them into typed results, and `client.ts` is the only place that talks to GitHub.
 - Errors are mapped to typed classes (`NotFoundError`, `RateLimitError`, `AuthError`, `NetworkError`) so route handlers can return the right HTTP status.
+
+## Caching and rate limiting
+
+GitHub's GraphQL API gives one token 5,000 points per hour, shared by every visitor. Two things keep that from running out:
+
+**Cache-aside with Upstash Redis.** Each service wraps its loader in `cached()`. Keys are versioned (`gh:v1:user:<name>`, `gh:v1:repo:<owner>/<repo>`, ...) so a response-shape change can be rolled out by bumping the version, and each resource has its own TTL. Hits and misses are logged as structured JSON, which is how I counted how many GitHub calls a page actually makes.
+
+**Per-IP sliding-window rate limit.** `enforceLimit()` uses `@upstash/ratelimit` with a sliding window of 20 requests per hour per IP, under the `rl:gh-miss` prefix. It only runs on a cache **miss**, inside the loader, so a cached page costs no quota. Going over the limit throws a `ClientRateLimitError` with a retry-after value, and the UI renders a rate-limited state instead of an error page. Each consumed unit is logged with the loader name (`gh/user`, `gh/repo`, ...) and the IP.
+
+If Upstash env vars are missing (plain local dev), the cache and limiter are skipped and requests go straight to GitHub.
+
+**Measured, not guessed.** In dev logs, one full cold journey (profile → commits → repo → compare) currently costs 9 limiter units because each loader charges separately. Bundling the profile and repo loaders into single GraphQL queries is on the roadmap.
 
 ## Running it locally
 
@@ -55,6 +69,10 @@ The GraphQL API always requires authentication, so a token is required. Create `
 
 ```
 GITHUB_TOKEN=ghp_xxxxxxxx
+
+# Optional: enables caching + rate limiting
+UPSTASH_REDIS_REST_URL=...
+UPSTASH_REDIS_REST_TOKEN=...
 ```
 
 A token with no extra scopes is enough for public data. Generate one at github.com/settings/tokens.
@@ -77,6 +95,7 @@ app/
   page.tsx                          landing + search
   profiles/                         user dashboard (+ repos, commits tabs)
   repo/                             repo dashboard
+  compare/                          shareable two-user comparison page
   api/github/
     user/[username]/                profile + contributions
     repo/[owner]/[name]/            repo + commits
@@ -87,9 +106,11 @@ components/
   repo/                             stats, activity, timeline, contributors, sidebar
   compare/                          search bar, monthly chart
   landing/                          navbar, stats, CTA, modals
-  ui/ shared/ icons/                primitives and shared states
+  ui/ shared/ icons/                primitives and shared states (incl. rate-limited)
 
 lib/
+  redis.ts                          Upstash client (null when env vars are missing)
+  rate-limit.ts                     enforceLimit(): per-IP sliding window
   api/github/
     client.ts                       GraphQL client
     errors.ts                       typed errors
@@ -103,15 +124,20 @@ lib/
 ## Things that were annoying to get right
 
 - GitHub returns different failure modes (rate limit, bad token, missing user, network) that all need different UI and status codes, hence the typed error classes
+- Rate limiting per page view was the wrong unit: charging on cache misses only, inside the loader, means cached views are free and a direct URL can't skip the limit
+- A profile → repo journey was costing 8 limiter units, which only left room for about 2 journeys per hour. Per-loader logging showed exactly where it went
 - Doing the heatmap and language chart at 375px first and scaling up took a full redesign pass; they did not just "shrink nicely" from the desktop versions
 - New repos with zero languages needed an explicit empty state instead of an empty chart rendering as a blank box
 - Users with no public repos or no commit activity needed their own empty states
 
 ## Roadmap
 
-- [ ] Response caching and per-user rate limiting
+- [x] Response caching (Upstash Redis, versioned keys)
+- [x] Per-IP rate limiting on cache misses
+- [ ] Fewer GitHub calls per page: bundle profile and repo loaders into one GraphQL query each
+- [ ] Global rate-limit guard to protect the shared GitHub token
+- [ ] Open-source repo recommendations based on a user's languages and topics (heuristic skill profile → GitHub search → scored results, with its own rate-limit bucket)
 - [ ] GitHub OAuth (per-user quota, history, bookmarks)
-- [ ] Open-source repo recommendations based on a user's languages and topics
 - [ ] Repo digest: turn a repo into an LLM-friendly text prompt
 - [ ] Auto-generated architecture diagram for a repo
 - [ ] Export the dashboard as an image or PDF
